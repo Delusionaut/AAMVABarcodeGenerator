@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -80,10 +81,6 @@ enum class FormSection(val title: String) {
     VEHICLE("Vehicle Information")
 }
 
-// Collapsible section state
-data class SectionState(
-    val isExpanded: Boolean = true
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,206 +129,112 @@ fun GenerateScreen(
     endorsements: String,
     onEndorsementsChange: (String) -> Unit
 ) {
-    // State for collapsible sections
-    var sectionStates by remember { 
-        mutableStateOf(
-            FormSection.values().associateWith { it == FormSection.PERSONAL }
-        )
-    }
-    
     val listState = rememberLazyListState()
-    
-    // Sync section expansion with legacy tab for backwards compatibility
-    LaunchedEffect(currentFormTab) {
-        val targetSection = when (currentFormTab) {
-            FormTab.Personal -> FormSection.PERSONAL
-            FormTab.Dates -> FormSection.DATES
-            FormTab.IdNumbers -> FormSection.IDENTIFICATION
-            FormTab.Physical -> FormSection.PHYSICAL
-            FormTab.Address -> FormSection.ADDRESS
-            FormTab.Vehicle -> FormSection.VEHICLE
-        }
-        sectionStates = FormSection.values().associateWith { section ->
-            section == targetSection
-        }
-    }
-    
-    // Track first visible section for tab sync
-    val firstVisibleSection by remember {
-        derivedStateOf {
-            val visibleItemsInfo = listState.layoutInfo.visibleItemsInfo
-            visibleItemsInfo.firstOrNull()?.index?.let { index ->
-                FormSection.values().getOrNull(index)
-            }
-        }
-    }
-    
-    LaunchedEffect(firstVisibleSection) {
-        firstVisibleSection?.let { section ->
-            val targetTab = when (section) {
-                FormSection.PERSONAL -> FormTab.Personal
-                FormSection.DATES -> FormTab.Dates
-                FormSection.IDENTIFICATION -> FormTab.IdNumbers
-                FormSection.PHYSICAL -> FormTab.Physical
-                FormSection.ADDRESS -> FormTab.Address
-                FormSection.VEHICLE -> FormTab.Vehicle
-            }
-            if (currentFormTab != targetTab) {
-                onFormTabChange(targetTab)
-            }
-        }
-    }
     
     LazyColumn(
         state = listState,
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .imePadding(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(FormSection.values()) { section ->
-            CollapsibleSection(
-                title = section.title,
-                isExpanded = sectionStates[section] == true,
-                onToggle = {
-                    sectionStates = sectionStates.toMutableMap().apply {
-                        this[section] = !(this[section] ?: true)
-                    }
-                }
-            ) {
-                when (section) {
-                    FormSection.PERSONAL -> PersonalSectionContent(
-                        familyName = familyName,
-                        onFamilyNameChange = onFamilyNameChange,
-                        firstName = firstName,
-                        onFirstNameChange = onFirstNameChange,
-                        middleName = middleName,
-                        onMiddleNameChange = onMiddleNameChange
-                    )
-                    FormSection.DATES -> DatesSectionContent(
-                        dateOfBirth = dateOfBirth,
-                        onDateOfBirthChange = onDateOfBirthChange,
-                        dateOfIssue = dateOfIssue,
-                        onDateOfIssueChange = onDateOfIssueChange,
-                        onRandomIssueDate = onRandomIssueDate,
-                        dateOfExpiry = dateOfExpiry,
-                        onDateOfExpiryChange = onDateOfExpiryChange,
-                        onCalculateExpiry = onCalculateExpiry
-                    )
-                    FormSection.IDENTIFICATION -> IdentificationSectionContent(
-                        iin = iin,
-                        onIinChange = onIinChange,
-                        customerId = customerId,
-                        onCustomerIdChange = onCustomerIdChange,
-                        documentDiscriminator = documentDiscriminator,
-                        onDocumentDiscriminatorChange = onDocumentDiscriminatorChange,
-                        onCalculateDocDisc = onCalculateDocDisc
-                    )
-                    FormSection.PHYSICAL -> PhysicalSectionContent(
-                        sex = sex,
-                        onSexChange = onSexChange,
-                        eyeColor = eyeColor,
-                        onEyeColorChange = onEyeColorChange,
-                        height = height,
-                        onHeightChange = onHeightChange
-                    )
-                    FormSection.ADDRESS -> AddressSectionContent(
-                        addressStreet = addressStreet,
-                        onAddressStreetChange = onAddressStreetChange,
-                        addressCity = addressCity,
-                        onAddressCityChange = onAddressCityChange,
-                        addressState = addressState,
-                        onAddressStateChange = onAddressStateChange,
-                        addressZip = addressZip,
-                        onAddressZipChange = onAddressZipChange
-                    )
-                    FormSection.VEHICLE -> VehicleSectionContent(
-                        vehicleClass = vehicleClass,
-                        onVehicleClassChange = onVehicleClassChange,
-                        restrictions = restrictions,
-                        onRestrictionsChange = onRestrictionsChange,
-                        endorsements = endorsements,
-                        onEndorsementsChange = onEndorsementsChange
-                    )
-                }
-            }
+        item {
+            Text(
+                text = "AAMVA Barcode Generator",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
         }
+
+        item { SectionHeader("Personal Information") }
+        item { PersonalSectionContent(
+            familyName = familyName,
+            onFamilyNameChange = onFamilyNameChange,
+            firstName = firstName,
+            onFirstNameChange = onFirstNameChange,
+            middleName = middleName,
+            onMiddleNameChange = onMiddleNameChange
+        ) }
+
+        item { SectionHeader("Dates") }
+        item { DatesSectionContent(
+            dateOfBirth = dateOfBirth,
+            onDateOfBirthChange = onDateOfBirthChange,
+            dateOfIssue = dateOfIssue,
+            onDateOfIssueChange = onDateOfIssueChange,
+            onRandomIssueDate = onRandomIssueDate,
+            dateOfExpiry = dateOfExpiry,
+            onDateOfExpiryChange = onDateOfExpiryChange,
+            onCalculateExpiry = onCalculateExpiry
+        ) }
+
+        item { SectionHeader("Identification Numbers") }
+        item { IdentificationSectionContent(
+            iin = iin,
+            onIinChange = onIinChange,
+            customerId = customerId,
+            onCustomerIdChange = onCustomerIdChange,
+            documentDiscriminator = documentDiscriminator,
+            onDocumentDiscriminatorChange = onDocumentDiscriminatorChange,
+            onCalculateDocDisc = onCalculateDocDisc
+        ) }
+
+        item { SectionHeader("Physical Characteristics") }
+        item { PhysicalSectionContent(
+            sex = sex,
+            onSexChange = onSexChange,
+            eyeColor = eyeColor,
+            onEyeColorChange = onEyeColorChange,
+            height = height,
+            onHeightChange = onHeightChange
+        ) }
+
+        item { SectionHeader("Address") }
+        item { AddressSectionContent(
+            addressStreet = addressStreet,
+            onAddressStreetChange = onAddressStreetChange,
+            addressCity = addressCity,
+            onAddressCityChange = onAddressCityChange,
+            addressState = addressState,
+            onAddressStateChange = onAddressStateChange,
+            addressZip = addressZip,
+            onAddressZipChange = onAddressZipChange
+        ) }
+
+        item { SectionHeader("Vehicle Information") }
+        item { VehicleSectionContent(
+            vehicleClass = vehicleClass,
+            onVehicleClassChange = onVehicleClassChange,
+            restrictions = restrictions,
+            onRestrictionsChange = onRestrictionsChange,
+            endorsements = endorsements,
+            onEndorsementsChange = onEndorsementsChange
+        ) }
         
         // Bottom spacing for FAB
         item {
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
 
 @Composable
-private fun CollapsibleSection(
-    title: String,
-    isExpanded: Boolean,
-    onToggle: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column {
-            // Section header - clickable to expand/collapse
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onToggle)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = if (isExpanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .then(
-                            if (isExpanded) Modifier else Modifier
-                        )
-                )
-            }
-            
-            // Expand/collapse animation
-            AnimatedVisibility(
-                visible = isExpanded,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Column {
-                    // Divider
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant
-                    )
-                    
-                    // Section content
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        content()
-                    }
-                }
-            }
-        }
+private fun SectionHeader(title: String) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
     }
 }
 
