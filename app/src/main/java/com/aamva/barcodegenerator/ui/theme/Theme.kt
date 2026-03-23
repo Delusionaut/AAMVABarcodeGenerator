@@ -10,111 +10,96 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Light theme - clean professional white/grey palette
-private val LightColorScheme = lightColorScheme(
-    // Primary - slate blue-grey for professional appearance
-    primary = SlateBlue50,
-    onPrimary = Grey999,
-    primaryContainer = SlateBlue95,
-    onPrimaryContainer = SlateBlue20,
+// Government Light Theme - Official, professional appearance
+private val GovernmentLightColorScheme = lightColorScheme(
+    primary = GovernmentNavy,
+    onPrimary = Color.White,
+    primaryContainer = GovernmentNavyPale,
+    onPrimaryContainer = GovernmentNavyDark,
     
-    // Secondary - subtle grey tones
-    secondary = Grey50,
-    onSecondary = Grey10,
-    secondaryContainer = Grey97,
-    onSecondaryContainer = Grey20,
+    secondary = GovernmentGray,
+    onSecondary = Color.White,
+    secondaryContainer = GovernmentGrayPale,
+    onSecondaryContainer = GovernmentGrayDark,
     
-    // Tertiary - accent for success states
-    tertiary = Success40,
-    onTertiary = Grey999,
-    tertiaryContainer = Success95,
-    onTertiaryContainer = Success10,
+    tertiary = GovernmentNavyLight,
+    onTertiary = Color.White,
+    tertiaryContainer = GovernmentNavyPale,
+    onTertiaryContainer = GovernmentNavyDark,
     
-    // Error states
-    error = Error40,
-    onError = Grey999,
-    errorContainer = Error95,
-    onErrorContainer = Error10,
+    error = GovernmentRed,
+    onError = Color.White,
+    errorContainer = GovernmentRedLight,
+    onErrorContainer = GovernmentRed,
     
-    // Background and surface - pure whites
-    background = Grey999,
-    onBackground = Grey10,
+    background = OfficialLight,
+    onBackground = GovernmentGrayDark,
     
-    surface = SurfaceWhite,
-    onSurface = Grey10,
-    surfaceVariant = Grey97,
-    onSurfaceVariant = Grey50,
+    surface = OfficialWhite,
+    onSurface = GovernmentGrayDark,
+    surfaceVariant = GovernmentGrayPale,
+    onSurfaceVariant = GovernmentGray,
     
-    // Borders and dividers
-    outline = Grey85,
-    outlineVariant = Grey95,
+    outline = OfficialBorder,
+    outlineVariant = OfficialDivider,
     
-    // Inverse colors for cards on dark backgrounds
-    inverseSurface = Grey20,
-    inverseOnSurface = Grey97,
-    inversePrimary = SlateBlue80,
+    inverseSurface = GovernmentGrayDark,
+    inverseOnSurface = GovernmentGrayPale,
+    inversePrimary = GovernmentNavyLight,
     
-    // Scrim for dialogs and sheets
-    scrim = Grey10
+    scrim = Color.Black.copy(alpha = 0.32f)
 )
 
-// Dark theme - subtle dark grey palette
-private val DarkColorScheme = darkColorScheme(
-    // Primary - lighter slate for dark mode
-    primary = SlateBlue80,
-    onPrimary = SlateBlue20,
-    primaryContainer = SlateBlue30,
-    onPrimaryContainer = SlateBlue95,
+// Government Dark Theme
+private val GovernmentDarkColorScheme = darkColorScheme(
+    primary = GovernmentNavyLight,
+    onPrimary = GovernmentNavyDark,
+    primaryContainer = GovernmentNavy,
+    onPrimaryContainer = GovernmentNavyPale,
     
-    // Secondary
-    secondary = Grey70,
-    onSecondary = Grey20,
-    secondaryContainer = Grey30,
-    onSecondaryContainer = Grey95,
+    secondary = GovernmentGrayLight,
+    onSecondary = GovernmentGrayDark,
+    secondaryContainer = GovernmentGray,
+    onSecondaryContainer = GovernmentGrayPale,
     
-    // Tertiary
-    tertiary = Success80,
-    onTertiary = Success20,
-    tertiaryContainer = Success30,
-    onTertiaryContainer = Success95,
+    tertiary = GovernmentNavyPale,
+    onTertiary = GovernmentNavyDark,
+    tertiaryContainer = GovernmentNavyDark,
+    onTertiaryContainer = GovernmentNavyPale,
     
-    // Error states
-    error = Error80,
-    onError = Error20,
-    errorContainer = Error30,
-    onErrorContainer = Error95,
+    error = Color(0xFFFF8A80),
+    onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
     
-    // Background and surface
-    background = Grey10,
-    onBackground = Grey97,
+    background = GovernmentGrayDark,
+    onBackground = GovernmentGrayPale,
     
-    surface = Grey10,
-    onSurface = Grey97,
-    surfaceVariant = Grey20,
-    onSurfaceVariant = Grey70,
+    surface = GovernmentGrayDark,
+    onSurface = GovernmentGrayPale,
+    surfaceVariant = GovernmentGray,
+    onSurfaceVariant = GovernmentGrayLight,
     
-    // Borders and dividers
-    outline = Grey50,
-    outlineVariant = Grey30,
+    outline = GovernmentGray,
+    outlineVariant = GovernmentGrayDark,
     
-    // Inverse colors
-    inverseSurface = Grey97,
-    inverseOnSurface = Grey20,
-    inversePrimary = SlateBlue50,
+    inverseSurface = GovernmentGrayPale,
+    inverseOnSurface = GovernmentGrayDark,
+    inversePrimary = GovernmentNavy,
     
-    // Scrim
-    scrim = Grey10
+    scrim = Color.Black.copy(alpha = 0.32f)
 )
 
 @Composable
 fun AAMVABarcodeGeneratorTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Disabled to use our custom minimalist theme
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -122,17 +107,16 @@ fun AAMVABarcodeGeneratorTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> GovernmentDarkColorScheme
+        else -> GovernmentLightColorScheme
     }
     
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Use primary color for status bar in light mode, surface color in dark mode
-            window.statusBarColor = if (darkTheme) Grey10.toArgb() else SurfaceWhite.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            window.statusBarColor = GovernmentNavy.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
         }
     }
 
