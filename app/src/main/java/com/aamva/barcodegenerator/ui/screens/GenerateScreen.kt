@@ -158,8 +158,8 @@ fun GenerateScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            contentPadding = PaddingValues(4.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             // Official Header Banner
             item {
@@ -167,236 +167,194 @@ fun GenerateScreen(
             }
 
             // Personal Information Section
-            item { SectionHeader("PERSONAL INFORMATION") }
-            item { 
+            item { CompactSectionHeader("1. PERSONAL INFORMATION") }
+            item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    FormTextField(
+                    CompactTextField(
                         value = familyName,
                         onValueChange = onFamilyNameChange,
-                        label = "LAST NAME",
-                        required = true,
-                        modifier = Modifier.weight(1f),
-                        hint = "Surname"
+                        label = "LAST NAME *",
+                        modifier = Modifier.weight(1f)
                     )
-                    FormTextField(
+                    CompactTextField(
                         value = firstName,
                         onValueChange = onFirstNameChange,
-                        label = "FIRST NAME",
-                        required = true,
-                        modifier = Modifier.weight(1f),
-                        hint = "Given name"
+                        label = "FIRST NAME *",
+                        modifier = Modifier.weight(1f)
+                    )
+                    CompactTextField(
+                        value = middleName,
+                        onValueChange = onMiddleNameChange,
+                        label = "MIDDLE NAME",
+                        modifier = Modifier.weight(0.8f)
                     )
                 }
-            }
-            item {
-                FormTextField(
-                    value = middleName,
-                    onValueChange = onMiddleNameChange,
-                    label = "MIDDLE NAME",
-                    required = false,
-                    hint = "Middle name or initial"
-                )
             }
 
             // Dates Section
-            item { SectionHeader("DATES") }
+            item { CompactSectionHeader("2. DATES") }
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    FormTextField(
+                    CompactTextField(
                         value = dateOfBirth,
                         onValueChange = { onDateOfBirthChange(formatDateToMMDDYYYY(it)) },
-                        label = "DATE OF BIRTH",
-                        required = true,
+                        label = "DATE OF BIRTH *",
                         modifier = Modifier.weight(1f),
-                        hint = "MMDDYYYY",
                         keyboardType = KeyboardType.Number,
                         maxChars = 8
                     )
-                    FormTextFieldWithAction(
+                    CompactTextField(
                         value = dateOfIssue,
                         onValueChange = { onDateOfIssueChange(formatDateToMMDDYYYY(it)) },
-                        label = "DATE OF ISSUE",
-                        required = true,
-                        onActionClick = onRandomIssueDate,
+                        label = "DATE OF ISSUE *",
                         modifier = Modifier.weight(1f),
-                        hint = "MMDDYYYY",
+                        keyboardType = KeyboardType.Number,
+                        maxChars = 8
+                    )
+                    CompactTextField(
+                        value = dateOfExpiry,
+                        onValueChange = { onDateOfExpiryChange(formatDateToMMDDYYYY(it)) },
+                        label = "DATE OF EXPIRY *",
+                        modifier = Modifier.weight(1f),
+                        keyboardType = KeyboardType.Number,
                         maxChars = 8
                     )
                 }
             }
-            item {
-                FormTextFieldWithAction(
-                    value = dateOfExpiry,
-                    onValueChange = { onDateOfExpiryChange(formatDateToMMDDYYYY(it)) },
-                    label = "DATE OF EXPIRY",
-                    required = true,
-                    onActionClick = onCalculateExpiry,
-                    hint = "MMDDYYYY",
-                    maxChars = 8
-                )
-            }
 
             // Identification Numbers Section
-            item { SectionHeader("IDENTIFICATION NUMBERS") }
+            item { CompactSectionHeader("3. IDENTIFICATION NUMBERS") }
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    FormTextField(
+                    CompactTextField(
                         value = iin,
                         onValueChange = { onIinChange(it.take(6)) },
-                        label = "IIN",
-                        required = true,
-                        modifier = Modifier.weight(0.4f),
-                        hint = "6 digits",
+                        label = "IIN *",
+                        modifier = Modifier.weight(0.3f),
                         maxChars = 6
                     )
-                    FormTextField(
+                    CompactTextField(
                         value = customerId,
                         onValueChange = onCustomerIdChange,
-                        label = "LICENSE/ID NUMBER",
-                        required = true,
-                        modifier = Modifier.weight(0.6f),
-                        hint = "State ID number"
+                        label = "LICENSE/ID NUMBER *",
+                        modifier = Modifier.weight(0.5f)
+                    )
+                    CompactTextField(
+                        value = documentDiscriminator,
+                        onValueChange = onDocumentDiscriminatorChange,
+                        label = "DOC DISC *",
+                        modifier = Modifier.weight(0.5f)
                     )
                 }
             }
-            item {
-                FormTextFieldWithAction(
-                    value = documentDiscriminator,
-                    onValueChange = onDocumentDiscriminatorChange,
-                    label = "DOCUMENT DISCRIMINATOR",
-                    required = true,
-                    onActionClick = onCalculateDocDisc,
-                    hint = "Unique document ID"
-                )
-            }
 
             // Physical Characteristics Section
-            item { SectionHeader("PHYSICAL CHARACTERISTICS") }
+            item { CompactSectionHeader("4. PHYSICAL CHARACTERISTICS") }
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    FormDropdownField(
+                    CompactTextField(
                         value = sex,
                         onValueChange = { onSexChange(it.take(1)) },
-                        label = "SEX",
-                        required = true,
-                        modifier = Modifier.weight(0.33f),
-                        options = listOf("1" to "Male", "2" to "Female", "9" to "Unknown")
+                        label = "SEX *",
+                        modifier = Modifier.weight(0.25f),
+                        maxChars = 1
                     )
-                    FormDropdownField(
+                    CompactTextField(
                         value = eyeColor,
                         onValueChange = { onEyeColorChange(it.take(3).uppercase()) },
-                        label = "EYE COLOR",
-                        required = true,
-                        modifier = Modifier.weight(0.33f),
-                        options = listOf("BLK" to "Black", "BLU" to "Blue", "BRO" to "Brown", 
-                                       "GRY" to "Gray", "GRN" to "Green", "HAZ" to "Hazel"),
+                        label = "EYE COLOR *",
+                        modifier = Modifier.weight(0.35f),
                         maxChars = 3
                     )
-                    FormTextField(
+                    CompactTextField(
                         value = height,
                         onValueChange = onHeightChange,
-                        label = "HEIGHT",
-                        required = true,
-                        modifier = Modifier.weight(0.34f),
-                        hint = "XXX in"
+                        label = "HEIGHT *",
+                        modifier = Modifier.weight(0.4f)
                     )
                 }
             }
 
             // Address Section
-            item { SectionHeader("ADDRESS") }
+            item { CompactSectionHeader("5. ADDRESS") }
             item {
-                FormTextField(
+                CompactTextField(
                     value = addressStreet,
                     onValueChange = onAddressStreetChange,
-                    label = "STREET ADDRESS",
-                    required = true,
-                    hint = "Number and street name"
+                    label = "STREET ADDRESS *"
                 )
             }
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    FormTextField(
+                    CompactTextField(
                         value = addressCity,
                         onValueChange = onAddressCityChange,
-                        label = "CITY",
-                        required = true,
-                        modifier = Modifier.weight(1f),
-                        hint = "City name"
+                        label = "CITY *",
+                        modifier = Modifier.weight(1f)
                     )
-                    FormTextField(
+                    CompactTextField(
                         value = addressState,
                         onValueChange = { onAddressStateChange(it.take(2).uppercase()) },
-                        label = "STATE",
-                        required = true,
-                        modifier = Modifier.weight(0.35f),
-                        maxChars = 2,
-                        hint = "XX"
+                        label = "STATE *",
+                        modifier = Modifier.weight(0.25f),
+                        maxChars = 2
                     )
-                    FormTextField(
+                    CompactTextField(
                         value = addressZip,
                         onValueChange = { onAddressZipChange(it.take(11)) },
-                        label = "ZIP CODE",
-                        required = true,
-                        modifier = Modifier.weight(0.45f),
-                        maxChars = 11,
-                        hint = "12345"
+                        label = "ZIP *",
+                        modifier = Modifier.weight(0.35f),
+                        maxChars = 11
                     )
                 }
             }
 
             // Vehicle Information Section
-            item { SectionHeader("VEHICLE INFORMATION") }
+            item { CompactSectionHeader("6. VEHICLE INFORMATION") }
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    FormTextField(
+                    CompactTextField(
                         value = vehicleClass,
                         onValueChange = onVehicleClassChange,
-                        label = "VEHICLE CLASS",
-                        required = false,
-                        modifier = Modifier.weight(1f),
-                        hint = "C, M, A, B, D"
+                        label = "VEH CLASS",
+                        modifier = Modifier.weight(1f)
                     )
-                    FormTextField(
+                    CompactTextField(
                         value = restrictions,
                         onValueChange = onRestrictionsChange,
                         label = "RESTRICTIONS",
-                        required = false,
-                        modifier = Modifier.weight(1f),
-                        hint = "B, C, G, K, L"
+                        modifier = Modifier.weight(1f)
                     )
-                    FormTextField(
+                    CompactTextField(
                         value = endorsements,
                         onValueChange = onEndorsementsChange,
                         label = "ENDORSEMENTS",
-                        required = false,
-                        modifier = Modifier.weight(1f),
-                        hint = "H, N, P, S, T"
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
             
             // Bottom spacing for navigation
             item {
-                Spacer(modifier = Modifier.height(80.dp))
+                Spacer(modifier = Modifier.height(60.dp))
             }
         }
     }
@@ -407,30 +365,29 @@ private fun DMVOfficialHeader() {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        color = GovernmentNavy,
-        shadowElevation = 2.dp
+            .padding(bottom = 4.dp),
+        color = GovernmentNavy
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "AAMVA BARCODE DATA FORM",
-                style = MaterialTheme.typography.titleMedium.copy(
+                style = MaterialTheme.typography.titleSmall.copy(
                     fontFamily = FontFamily.SansSerif,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    letterSpacing = 1.sp
+                    fontSize = 14.sp,
+                    letterSpacing = 0.5.sp
                 ),
                 color = OfficialWhite
             )
             Text(
                 text = "Driver License / State ID Application",
-                style = MaterialTheme.typography.bodySmall.copy(
+                style = MaterialTheme.typography.labelSmall.copy(
                     fontFamily = FontFamily.SansSerif,
-                    fontSize = 11.sp,
-                    letterSpacing = 0.5.sp
+                    fontSize = 10.sp,
+                    letterSpacing = 0.sp
                 ),
                 color = GovernmentGrayLight
             )
@@ -439,36 +396,34 @@ private fun DMVOfficialHeader() {
 }
 
 @Composable
-private fun SectionHeader(title: String) {
+private fun CompactSectionHeader(title: String) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        color = GovernmentNavy.copy(alpha = 0.08f),
-        shape = RoundedCornerShape(2.dp)
+            .padding(vertical = 2.dp),
+        color = GovernmentNavy.copy(alpha = 0.1f),
+        shape = RoundedCornerShape(1.dp)
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall.copy(
+            style = MaterialTheme.typography.labelMedium.copy(
                 fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                letterSpacing = 0.5.sp
+                fontSize = 10.sp,
+                letterSpacing = 0.sp
             ),
             color = GovernmentNavy,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
         )
     }
 }
 
 @Composable
-private fun FormTextField(
+private fun CompactTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    required: Boolean,
     modifier: Modifier = Modifier,
-    hint: String = "",
     keyboardType: KeyboardType = KeyboardType.Text,
     maxChars: Int? = null
 ) {
@@ -483,124 +438,37 @@ private fun FormTextField(
             onValueChange(limitedValue)
         },
         label = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontFamily = FontFamily.SansSerif,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-                if (required) {
-                    Text(
-                        text = " *",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontFamily = FontFamily.SansSerif,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = GovernmentRed
-                    )
-                }
-            }
-        },
-        placeholder = {
             Text(
-                text = hint,
-                style = MaterialTheme.typography.bodySmall.copy(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(
                     fontFamily = FontFamily.SansSerif,
-                    fontSize = 11.sp
-                ),
-                color = GovernmentGrayLight
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Medium
+                )
             )
         },
-        supportingText = if (required && value.isEmpty()) {
-            @Composable {
-                Text(
-                    text = "Required",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontFamily = FontFamily.SansSerif,
-                        fontSize = 9.sp
-                    ),
-                    color = GovernmentRed
-                )
-            }
-        } else null,
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        isError = required && value.isEmpty(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = GovernmentNavy,
             unfocusedBorderColor = OfficialBorder,
             focusedLabelColor = GovernmentNavy,
             unfocusedLabelColor = GovernmentGray,
             cursorColor = GovernmentNavy,
-            errorBorderColor = GovernmentRed,
             focusedContainerColor = OfficialWhite,
-            unfocusedContainerColor = OfficialWhite,
-            errorContainerColor = OfficialWhite
+            unfocusedContainerColor = OfficialWhite
         ),
-        shape = RoundedCornerShape(2.dp)
+        shape = RoundedCornerShape(1.dp)
     )
-}
-
-@Composable
-private fun FormTextFieldWithAction(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    required: Boolean,
-    onActionClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    hint: String = "",
-    keyboardType: KeyboardType = KeyboardType.Text,
-    maxChars: Int? = null
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        FormTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = label,
-            required = required,
-            modifier = Modifier.weight(1f),
-            hint = hint,
-            keyboardType = keyboardType,
-            maxChars = maxChars
-        )
-        IconButton(
-            onClick = onActionClick,
-            modifier = Modifier
-                .size(40.dp)
-                .padding(top = 4.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(GovernmentNavy.copy(alpha = 0.1f))
-                .border(BorderStroke(1.dp, OfficialBorder), RoundedCornerShape(2.dp))
-        ) {
-            Icon(
-                imageVector = Icons.Default.Calculate,
-                contentDescription = "Auto-calculate",
-                tint = GovernmentNavy,
-                modifier = Modifier.size(18.dp)
-            )
-        }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FormDropdownField(
+private fun CompactDropdownField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    required: Boolean,
     modifier: Modifier = Modifier,
     options: List<Pair<String, String>> = emptyList(),
     maxChars: Int? = null
@@ -619,32 +487,17 @@ private fun FormDropdownField(
                 onValueChange(limitedValue)
             },
             label = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontFamily = FontFamily.SansSerif,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontFamily = FontFamily.SansSerif,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Medium
                     )
-                    if (required) {
-                        Text(
-                            text = " *",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontFamily = FontFamily.SansSerif,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = GovernmentRed
-                        )
-                    }
-                }
+                )
             },
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            isError = required && value.isEmpty(),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = GovernmentNavy,
                 unfocusedBorderColor = OfficialBorder,
