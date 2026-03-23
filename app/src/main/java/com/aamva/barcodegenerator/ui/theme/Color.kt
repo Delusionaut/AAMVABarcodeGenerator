@@ -2,28 +2,28 @@ package com.aamva.barcodegenerator.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Official Government Color Palette - Muted navy blue for authority
-val GovernmentNavy = Color(0xFF1A365D)
-val GovernmentNavyDark = Color(0xFF0F2440)
-val GovernmentNavyLight = Color(0xFF2B4A7F)
-val GovernmentNavyPale = Color(0xFFE8EEF5)
+// DMV Professional Palette - Navy headers (#003366), gray backgrounds
+val GovernmentNavy = Color(0xFF003366)
+val GovernmentNavyDark = Color(0xFF002244)
+val GovernmentNavyLight = Color(0xFF336699)
+val GovernmentNavyPale = Color(0xFFF0F5FA)
 
-// Official grey - neutral professional
-val GovernmentGray = Color(0xFF4A5568)
-val GovernmentGrayDark = Color(0xFF2D3748)
-val GovernmentGrayLight = Color(0xFF718096)
-val GovernmentGrayPale = Color(0xFFF7FAFC)
+// Neutral grays
+val GovernmentGray = Color(0xFF666666)
+val GovernmentGrayDark = Color(0xFF333333)
+val GovernmentGrayLight = Color(0xFF999999)
+val GovernmentGrayPale = Color(0xFFF5F5F5)
 
-// Official white backgrounds
+// Surfaces and borders
 val OfficialWhite = Color(0xFFFFFFFF)
-val OfficialLight = Color(0xFFF5F7FA)
-val OfficialBorder = Color(0xFFD4D8E0)
-val OfficialDivider = Color(0xFFE2E8F0)
+val OfficialLight = Color(0xFFF5F5F5)
+val OfficialBorder = Color(0xFFE0E0E0)
+val OfficialDivider = Color(0xFFDDDDDD)
 
-// Status colors - muted, professional
-val GovernmentGreen = Color(0xFF1B5E20)
-val GovernmentGreenLight = Color(0xFFE8F5E9)
-val GovernmentRed = Color(0xFFB71C1C)
+// Status colors
+val GovernmentGreen = Color(0xFF006600)
+val GovernmentGreenLight = Color(0xFFE8F5E8)
+val GovernmentRed = Color(0xFFCC0000)
 val GovernmentRedLight = Color(0xFFFFEBEE)
-val GovernmentAmber = Color(0xFFE65100)
+val GovernmentAmber = Color(0xFFCC6600)
 val GovernmentAmberLight = Color(0xFFFFF3E0)

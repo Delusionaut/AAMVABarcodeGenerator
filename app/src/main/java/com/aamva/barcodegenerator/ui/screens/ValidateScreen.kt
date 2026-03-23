@@ -52,10 +52,9 @@ fun ValidateScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
+            .padding(12.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Header section
         Column {
@@ -81,8 +80,8 @@ fun ValidateScreen() {
             placeholder = { Text("@\\n~\\n636000\\n08\\nP\\nDL\\n01\\n...") },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(250.dp),
-            maxLines = 15,
+                .height(150.dp),
+            maxLines = 10,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
@@ -181,7 +180,7 @@ fun ValidateScreen() {
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             ),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(4.dp),
             enabled = !isValidating
         ) {
             if (isValidating) {
@@ -209,8 +208,8 @@ fun ValidateScreen() {
                         MaterialTheme.colorScheme.errorContainer
                     }
                 ),
-                shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                shape = RoundedCornerShape(4.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -261,8 +260,8 @@ fun ValidateScreen() {
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             ),
-            shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            shape = RoundedCornerShape(4.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp)

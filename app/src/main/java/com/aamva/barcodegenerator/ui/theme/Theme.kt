@@ -16,25 +16,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Government Light Theme - Official, professional appearance
+// DMV Light Theme - Compact government form aesthetic
 private val GovernmentLightColorScheme = lightColorScheme(
     primary = GovernmentNavy,
-    onPrimary = Color.White,
+    onPrimary = OfficialWhite,
     primaryContainer = GovernmentNavyPale,
     onPrimaryContainer = GovernmentNavyDark,
     
     secondary = GovernmentGray,
-    onSecondary = Color.White,
+    onSecondary = OfficialWhite,
     secondaryContainer = GovernmentGrayPale,
     onSecondaryContainer = GovernmentGrayDark,
     
     tertiary = GovernmentNavyLight,
-    onTertiary = Color.White,
-    tertiaryContainer = GovernmentNavyPale,
-    onTertiaryContainer = GovernmentNavyDark,
+    onTertiary = OfficialWhite,
+    tertiaryContainer = GovernmentGrayPale,
+    onTertiaryContainer = GovernmentNavy,
     
     error = GovernmentRed,
-    onError = Color.White,
+    onError = OfficialWhite,
     errorContainer = GovernmentRedLight,
     onErrorContainer = GovernmentRed,
     
@@ -115,7 +115,7 @@ fun AAMVABarcodeGeneratorTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = GovernmentNavy.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
         }
     }
 

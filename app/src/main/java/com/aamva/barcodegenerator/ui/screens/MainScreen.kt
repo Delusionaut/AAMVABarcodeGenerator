@@ -1,5 +1,7 @@
 package com.aamva.barcodegenerator.ui.screens
 
+import com.aamva.barcodegenerator.ui.theme.GovernmentNavy
+
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
@@ -103,18 +105,18 @@ fun MainScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         text = "AAMVA PDF417 Generator",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold
-                    ) 
+                        fontWeight = FontWeight.Bold,
+                        color = GovernmentNavy
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
-                modifier = Modifier.padding(horizontal = 8.dp)
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = GovernmentNavy
+                )
             )
         },
         bottomBar = {
@@ -256,7 +258,6 @@ fun MainScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
         ) {
             when (currentNavTab) {
                 NavTab.Generate -> {
@@ -292,12 +293,12 @@ fun MainScreen() {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(12.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surface
                             ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                            shape = RoundedCornerShape(16.dp)
+                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                            shape = RoundedCornerShape(4.dp)
                         ) {
                             Column(
                                 modifier = Modifier.padding(20.dp),
@@ -360,11 +361,11 @@ fun MainScreen() {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(12.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.errorContainer
                             ),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(4.dp)
                         ) {
                             Column(Modifier.padding(16.dp)) {
                                 Text(

@@ -1,5 +1,7 @@
 package com.aamva.barcodegenerator.ui.screens
 
+import com.aamva.barcodegenerator.ui.theme.GovernmentNavy
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -136,8 +138,8 @@ fun GenerateScreen(
         modifier = Modifier
             .fillMaxSize()
             .imePadding(),
-        contentPadding = PaddingValues(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
             Text(
@@ -228,8 +230,8 @@ private fun SectionHeader(title: String) {
             text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(vertical = 8.dp)
+            color = GovernmentNavy,
+            modifier = Modifier.padding(vertical = 4.dp)
         )
         HorizontalDivider(
             thickness = 1.dp,
@@ -367,7 +369,7 @@ private fun PhysicalSectionContent(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         MinimalistTextField(
             value = sex,
@@ -421,7 +423,7 @@ private fun AddressSectionContent(
     )
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         MinimalistTextField(
             value = addressCity,
@@ -465,7 +467,7 @@ private fun VehicleSectionContent(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         MinimalistTextField(
             value = vehicleClass,
@@ -517,11 +519,20 @@ private fun MinimalistTextField(
             val limitedValue = maxChars?.let { newValue.take(it) } ?: newValue
             onValueChange(limitedValue)
         },
-        label = { 
+        label = {
             Text(
                 text = if (isRequired) "$label *" else label,
-                style = MaterialTheme.typography.bodyMedium
-            ) 
+                style = MaterialTheme.typography.labelLarge
+            )
+        },
+        supportingText = {
+            if (isRequired && value.isEmpty()) {
+                Text(
+                    text = "Required field",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
         },
         modifier = modifier.fillMaxWidth(),
         singleLine = singleLine,
@@ -529,28 +540,29 @@ private fun MinimalistTextField(
         isError = isRequired && value.isEmpty(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
             focusedLabelColor = MaterialTheme.colorScheme.primary,
             unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            cursorColor = MaterialTheme.colorScheme.primary
+            cursorColor = MaterialTheme.colorScheme.primary,
+            errorBorderColor = MaterialTheme.colorScheme.error
         ),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(4.dp)
     )
     
-    // Info icon button
+    // Subtle info icon
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.CenterEnd
     ) {
         IconButton(
             onClick = { showHelpDialog = true },
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(20.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Info,
                 contentDescription = "More information about $label",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.size(16.dp)
             )
         }
     }
