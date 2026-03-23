@@ -20,7 +20,7 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.QrCode
 import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.ScannerAlt
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -161,11 +161,11 @@ fun MainScreen() {
                 NavigationBarItem(
                     selected = currentNavTab == NavTab.Validate,
                     onClick = { currentNavTab = NavTab.Validate },
-                    icon = { 
+                    icon = {
                         Icon(
-                            imageVector = Icons.Outlined.ScannerAlt,
+                            imageVector = Icons.Outlined.QrCodeScanner,
                             contentDescription = null
-                        ) 
+                        )
                     },
                     label = { Text("Validate") },
                     colors = NavigationBarItemDefaults.colors(

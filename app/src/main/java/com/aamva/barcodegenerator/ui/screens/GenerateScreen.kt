@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,6 +59,16 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
+// Legacy tab enum for backwards compatibility with MainScreen
+enum class FormTab {
+    Personal,
+    Dates,
+    IdNumbers,
+    Physical,
+    Address,
+    Vehicle
+}
 
 // Section definitions for unified layout
 enum class FormSection(val title: String) {
