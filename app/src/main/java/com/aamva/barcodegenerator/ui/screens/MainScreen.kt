@@ -6,21 +6,26 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Scanner
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.outlined.QrCode
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.ScannerAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -29,9 +34,6 @@ import com.aamva.barcodegenerator.generator.AAMVABarcodeGenerator
 import com.aamva.barcodegenerator.generator.AAMVAComplianceException
 import com.aamva.barcodegenerator.model.AAMVADataSet
 import com.aamva.barcodegenerator.model.HistoryItem
-import com.aamva.barcodegenerator.ui.screens.GenerateScreen
-import com.aamva.barcodegenerator.ui.screens.HistoryScreen
-import com.aamva.barcodegenerator.ui.screens.ValidateScreen
 import com.aamva.barcodegenerator.util.BarcodeFormatter
 import com.aamva.barcodegenerator.util.BarcodeSaver
 import com.aamva.barcodegenerator.util.HistoryManager
@@ -101,43 +103,95 @@ fun MainScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("AAMVA PDF417 Generator", fontWeight = FontWeight.Bold) },
+                title = { 
+                    Text(
+                        text = "AAMVA PDF417 Generator",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold
+                    ) 
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
         },
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = androidx.compose.ui.unit.Dp(0f)
+            ) {
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.QrCode, contentDescription = null) },
-                    label = { Text("Generate") },
                     selected = currentNavTab == NavTab.Generate,
-                    onClick = { currentNavTab = NavTab.Generate }
+                    onClick = { currentNavTab = NavTab.Generate },
+                    icon = { 
+                        Icon(
+                            imageVector = if (currentNavTab == NavTab.Generate) Icons.Filled.QrCodeScanner else Icons.Outlined.QrCode,
+                            contentDescription = null
+                        ) 
+                    },
+                    label = { Text("Generate") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.History, contentDescription = null) },
-                    label = { Text("History") },
                     selected = currentNavTab == NavTab.History,
-                    onClick = { currentNavTab = NavTab.History }
+                    onClick = { currentNavTab = NavTab.History },
+                    icon = { 
+                        Icon(
+                            imageVector = if (currentNavTab == NavTab.History) Icons.Filled.History else Icons.Outlined.History,
+                            contentDescription = null
+                        ) 
+                    },
+                    label = { Text("History") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Scanner, contentDescription = null) },
-                    label = { Text("Validate") },
                     selected = currentNavTab == NavTab.Validate,
-                    onClick = { currentNavTab = NavTab.Validate }
+                    onClick = { currentNavTab = NavTab.Validate },
+                    icon = { 
+                        Icon(
+                            imageVector = Icons.Outlined.ScannerAlt,
+                            contentDescription = null
+                        ) 
+                    },
+                    label = { Text("Validate") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
             }
         },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = currentNavTab == NavTab.Generate,
-                enter = fadeIn()
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
                 ExtendedFloatingActionButton(
-                    text = { Text("Generate Barcode") },
-                    icon = { Icon(Icons.Default.QrCode, contentDescription = null) },
+                    text = { 
+                        Text(
+                            "Generate Barcode",
+                            style = MaterialTheme.typography.labelLarge
+                        ) 
+                    },
+                    icon = { Icon(Icons.Outlined.QrCode, contentDescription = null) },
                     onClick = {
                         showProgressDialog = true
                         errorMessage = null
@@ -190,15 +244,19 @@ fun MainScreen() {
                                 showProgressDialog = false
                             }
                         }
-                    }
+                    },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             when (currentNavTab) {
                 NavTab.Generate -> {
@@ -235,21 +293,36 @@ fun MainScreen() {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                            shape = RoundedCornerShape(16.dp)
                         ) {
                             Column(
-                                modifier = Modifier.padding(16.dp),
+                                modifier = Modifier.padding(20.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text("Generated PDF417 Barcode", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                Text(
+                                    "Generated PDF417 Barcode",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
                                 Spacer(Modifier.height(16.dp))
                                 Image(
                                     bitmap = barcodeBitmap!!.asImageBitmap(),
                                     contentDescription = "Barcode",
-                                    modifier = Modifier.fillMaxWidth().height(200.dp)
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .clip(RoundedCornerShape(8.dp))
                                 )
-                                Spacer(Modifier.height(16.dp))
-                                Text("Length: ${rawData.length} chars", style = MaterialTheme.typography.bodySmall)
+                                Spacer(Modifier.height(12.dp))
+                                Text(
+                                    "Length: ${rawData.length} characters",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                                 Spacer(Modifier.height(16.dp))
                                 Button(
                                     onClick = {
@@ -269,9 +342,13 @@ fun MainScreen() {
                                             }
                                         }
                                     },
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                    shape = RoundedCornerShape(8.dp)
                                 ) {
-                                    Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(20.dp))
+                                    Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
                                     Spacer(Modifier.width(8.dp))
                                     Text("Save PNG")
                                 }
@@ -281,12 +358,27 @@ fun MainScreen() {
 
                     errorMessage?.let { error ->
                         Card(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            ),
+                            shape = RoundedCornerShape(12.dp)
                         ) {
                             Column(Modifier.padding(16.dp)) {
-                                Text("Error", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer)
-                                Text(error, color = MaterialTheme.colorScheme.onErrorContainer)
+                                Text(
+                                    "Error",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    error,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
                             }
                         }
                     }
@@ -325,13 +417,24 @@ fun MainScreen() {
             onDismissRequest = { },
             title = { Text("Generating...") },
             text = { 
-                Column {
-                    androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
                     Spacer(Modifier.height(16.dp))
-                    Text("Validating data, generating barcode, rendering image...")
+                    Text(
+                        "Validating data, generating barcode, rendering image...",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             },
-            confirmButton = { }
+            confirmButton = { },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(16.dp)
         )
     }
 
@@ -342,8 +445,12 @@ fun MainScreen() {
             title = { Text("Saved!") },
             text = { Text("Saved to Pictures/AAMVA_Barcodes/") },
             confirmButton = {
-                TextButton(onClick = { showSaveSuccessDialog = false }) { Text("OK") }
-            }
+                TextButton(onClick = { showSaveSuccessDialog = false }) { 
+                    Text("OK", color = MaterialTheme.colorScheme.primary) 
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(16.dp)
         )
     }
 
@@ -357,14 +464,33 @@ fun MainScreen() {
                     viewingBarcodeBitmap = null
                     currentViewingItem = null
                 },
-                title = { Text("${item.familyName}, ${item.firstName}") },
+                title = { 
+                    Text(
+                        "${item.familyName}, ${item.firstName}",
+                        fontWeight = FontWeight.SemiBold
+                    ) 
+                },
                 text = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Image(bitmap = bitmap.asImageBitmap(), contentDescription = "Barcode", modifier = Modifier.fillMaxWidth().height(300.dp))
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            bitmap = bitmap.asImageBitmap(), 
+                            contentDescription = "Barcode", 
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
                         Spacer(Modifier.height(16.dp))
-                        Text("ID: ${item.customerId}")
-                        Text("DOB: ${item.dateOfBirth}")
-                        Text("Saved: ${dateFormat.format(item.timestamp)}")
+                        Text("ID: ${item.customerId}", style = MaterialTheme.typography.bodyMedium)
+                        Text("DOB: ${item.dateOfBirth}", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            "Saved: ${dateFormat.format(item.timestamp)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 },
                 confirmButton = {
@@ -372,8 +498,12 @@ fun MainScreen() {
                         showViewDialog = false
                         viewingBarcodeBitmap = null
                         currentViewingItem = null
-                    }) { Text("Close") }
-                }
+                    }) { 
+                        Text("Close", color = MaterialTheme.colorScheme.primary) 
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp)
             )
         }
     }

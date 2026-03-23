@@ -15,62 +15,106 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+// Light theme - clean professional white/grey palette
 private val LightColorScheme = lightColorScheme(
-    primary = Indigo40,
-    onPrimary = Gray99,
-    primaryContainer = Indigo90,
-    onPrimaryContainer = Indigo10,
-    secondary = Blue40,
-    onSecondary = Gray99,
-    secondaryContainer = Blue90,
-    onSecondaryContainer = Blue10,
-    tertiary = Green40,
-    onTertiary = Gray99,
-    tertiaryContainer = Green90,
-    onTertiaryContainer = Green10,
-    error = Red40,
-    onError = Gray99,
-    errorContainer = Red90,
-    onErrorContainer = Red10,
-    background = Gray99,
-    onBackground = Gray10,
-    surface = Gray99,
-    onSurface = Gray10,
-    surfaceVariant = Gray95,
-    onSurfaceVariant = Gray20,
-    outline = Gray20
+    // Primary - slate blue-grey for professional appearance
+    primary = SlateBlue50,
+    onPrimary = Grey999,
+    primaryContainer = SlateBlue95,
+    onPrimaryContainer = SlateBlue20,
+    
+    // Secondary - subtle grey tones
+    secondary = Grey50,
+    onSecondary = Grey10,
+    secondaryContainer = Grey97,
+    onSecondaryContainer = Grey20,
+    
+    // Tertiary - accent for success states
+    tertiary = Success40,
+    onTertiary = Grey999,
+    tertiaryContainer = Success95,
+    onTertiaryContainer = Success10,
+    
+    // Error states
+    error = Error40,
+    onError = Grey999,
+    errorContainer = Error95,
+    onErrorContainer = Error10,
+    
+    // Background and surface - pure whites
+    background = Grey999,
+    onBackground = Grey10,
+    
+    surface = SurfaceWhite,
+    onSurface = Grey10,
+    surfaceVariant = Grey97,
+    onSurfaceVariant = Grey50,
+    
+    // Borders and dividers
+    outline = Grey85,
+    outlineVariant = Grey95,
+    
+    // Inverse colors for cards on dark backgrounds
+    inverseSurface = Grey20,
+    inverseOnSurface = Grey97,
+    inversePrimary = SlateBlue80,
+    
+    // Scrim for dialogs and sheets
+    scrim = Grey10
 )
 
+// Dark theme - subtle dark grey palette
 private val DarkColorScheme = darkColorScheme(
-    primary = Indigo80,
-    onPrimary = Indigo20,
-    primaryContainer = Indigo30,
-    onPrimaryContainer = Indigo90,
-    secondary = Blue80,
-    onSecondary = Blue20,
-    secondaryContainer = Blue30,
-    onSecondaryContainer = Blue90,
-    tertiary = Green80,
-    onTertiary = Green20,
-    tertiaryContainer = Green30,
-    onTertiaryContainer = Green90,
-    error = Red80,
-    onError = Red20,
-    errorContainer = Red30,
-    onErrorContainer = Red90,
-    background = Gray10,
-    onBackground = Gray90,
-    surface = Gray10,
-    onSurface = Gray90,
-    surfaceVariant = Gray20,
-    onSurfaceVariant = Gray90,
-    outline = Gray90
+    // Primary - lighter slate for dark mode
+    primary = SlateBlue80,
+    onPrimary = SlateBlue20,
+    primaryContainer = SlateBlue30,
+    onPrimaryContainer = SlateBlue95,
+    
+    // Secondary
+    secondary = Grey70,
+    onSecondary = Grey20,
+    secondaryContainer = Grey30,
+    onSecondaryContainer = Grey95,
+    
+    // Tertiary
+    tertiary = Success80,
+    onTertiary = Success20,
+    tertiaryContainer = Success30,
+    onTertiaryContainer = Success95,
+    
+    // Error states
+    error = Error80,
+    onError = Error20,
+    errorContainer = Error30,
+    onErrorContainer = Error95,
+    
+    // Background and surface
+    background = Grey10,
+    onBackground = Grey97,
+    
+    surface = Grey10,
+    onSurface = Grey97,
+    surfaceVariant = Grey20,
+    onSurfaceVariant = Grey70,
+    
+    // Borders and dividers
+    outline = Grey50,
+    outlineVariant = Grey30,
+    
+    // Inverse colors
+    inverseSurface = Grey97,
+    inverseOnSurface = Grey20,
+    inversePrimary = SlateBlue50,
+    
+    // Scrim
+    scrim = Grey10
 )
 
 @Composable
 fun AAMVABarcodeGeneratorTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Disabled to use our custom theme
+    dynamicColor: Boolean = false, // Disabled to use our custom minimalist theme
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -81,11 +125,13 @@ fun AAMVABarcodeGeneratorTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
+    
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
+            // Use primary color for status bar in light mode, surface color in dark mode
+            window.statusBarColor = if (darkTheme) Grey10.toArgb() else SurfaceWhite.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
