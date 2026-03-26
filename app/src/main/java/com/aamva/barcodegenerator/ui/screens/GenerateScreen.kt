@@ -199,7 +199,8 @@ fun GenerateScreen(
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     CompactTextField(
                         value = dateOfBirth,
@@ -217,6 +218,17 @@ fun GenerateScreen(
                         keyboardType = KeyboardType.Number,
                         maxChars = 8
                     )
+                    IconButton(
+                        onClick = onRandomIssueDate,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Calculate,
+                            contentDescription = "Random Issue Date",
+                            tint = GovernmentNavy,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                     CompactTextField(
                         value = dateOfExpiry,
                         onValueChange = { onDateOfExpiryChange(formatDateToMMDDYYYY(it)) },
@@ -225,6 +237,17 @@ fun GenerateScreen(
                         keyboardType = KeyboardType.Number,
                         maxChars = 8
                     )
+                    IconButton(
+                        onClick = onCalculateExpiry,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Calculate,
+                            contentDescription = "Calculate Expiry",
+                            tint = GovernmentNavy,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
 
@@ -233,7 +256,8 @@ fun GenerateScreen(
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     CompactTextField(
                         value = iin,
@@ -254,6 +278,17 @@ fun GenerateScreen(
                         label = "DOC DISC *",
                         modifier = Modifier.weight(0.5f)
                     )
+                    IconButton(
+                        onClick = onCalculateDocDisc,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Calculate,
+                            contentDescription = "Calculate Doc Disc",
+                            tint = GovernmentNavy,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
 

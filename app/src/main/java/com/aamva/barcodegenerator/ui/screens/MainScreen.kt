@@ -29,7 +29,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import com.aamva.barcodegenerator.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aamva.barcodegenerator.generator.AAMVABarcodeGenerator
@@ -106,12 +109,19 @@ fun MainScreen() {
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "AAMVA PDF417 Generator",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = GovernmentNavy
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.headerlogo),
+                            contentDescription = "AAMVA PDF417 Generator Logo",
+                            modifier = Modifier
+                                .height(56.dp)
+                                .width(220.dp)
+                                .align(Alignment.CenterStart),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
