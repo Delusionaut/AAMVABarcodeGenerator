@@ -193,7 +193,11 @@ fun MainScreen() {
             }
         },
         floatingActionButton = {
-            if (currentNavTab == NavTab.Generate) {
+            AnimatedVisibility(
+                visible = currentNavTab == NavTab.Generate,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 ExtendedFloatingActionButton(
                     text = {
                         Text(
@@ -203,83 +207,61 @@ fun MainScreen() {
                     },
                     icon = { Icon(Icons.Outlined.QrCode, contentDescription = null) },
                     onClick = {
-                        Toast.makeText(context, "Button clicked! Generating barcode...", Toast.LENGTH_SHORT).show()
-                        android.util.Log.d("MainScreen", "Generate Barcode button clicked")
                         showProgressDialog = true
                         errorMessage = null
-                        showBarcode = false
-                        barcodeBitmap = null
                         scope.launch {
-                            android.util.Log.d("MainScreen", "Coroutine started")
                             try {
-                                // Build the data set
                                 val dataSet = AAMVADataSet(
-                                    issuerIdentificationNumber = iin.ifBlank { "636000" },
-                                    customerFamilyName = familyName.ifBlank { "DOE" },
-                                    customerFirstName = firstName.ifBlank { "JOHN" },
+                                    issuerIdentificationNumber = iin,
+                                    customerFamilyName = familyName,
+                                    customerFirstName = firstName,
                                     customerMiddleName = middleName,
-                                    dateOfBirth = dateOfBirth.ifBlank { "01011990" },
-                                    dateOfIssue = dateOfIssue.ifBlank { SimpleDateFormat("MMddyyyy", Locale.US).format(Date()) },
-                                    dateOfExpiry = dateOfExpiry.ifBlank { "01012030" },
-                                    customerIdNumber = customerId.ifBlank { "D1234567" },
-                                    documentDiscriminator = documentDiscriminator.ifBlank { "DOC123456" },
-                                    sex = sex.ifBlank { "1" },
-                                    eyeColor = eyeColor.ifBlank { "BRO" },
-                                    height = height.ifBlank { "070 in" },
-                                    addressStreet1 = addressStreet.ifBlank { "123 MAIN ST" },
-                                    addressCity = addressCity.ifBlank { "SPRINGFIELD" },
-                                    addressJurisdictionCode = addressState.ifBlank { "VA" },
-                                    addressPostalCode = addressZip.ifBlank { "12345" },
+                                    dateOfBirth = dateOfBirth,
+                                    dateOfIssue = dateOfIssue.ifEmpty { SimpleDateFormat("MMddyyyy", Locale.US).format(Date()) },
+                                    dateOfExpiry = dateOfExpiry,
+                                    customerIdNumber = customerId,
+                                    documentDiscriminator = documentDiscriminator,
+                                    sex = sex,
+                                    eyeColor = eyeColor,
+                                    height = height,
+                                    addressStreet1 = addressStreet,
+                                    addressCity = addressCity,
+                                    addressJurisdictionCode = addressState,
+                                    addressPostalCode = addressZip,
                                     vehicleClass = vehicleClass,
                                     restrictionCodes = restrictions,
                                     endorsementCodes = endorsements,
                                     countryIdentification = "USA"
                                 )
 
-                                // Validate the data
-                                android.util.Log.d("MainScreen", "Validating data...")
                                 val validationResult = barcodeGenerator.validateDataSet(dataSet)
                                 if (!validationResult.isValid) {
-                                    android.util.Log.e("MainScreen", "Validation failed: ${validationResult.errors}")
                                     errorMessage = validationResult.errors.joinToString("\n")
                                     showProgressDialog = false
                                     return@launch
                                 }
-                                android.util.Log.d("MainScreen", "Validation passed")
 
-                                // Generate barcode
-                                android.util.Log.d("MainScreen", "Generating barcode data...")
                                 rawData = barcodeGenerator.generateAndValidateBarcode(dataSet)
-                                android.util.Log.d("MainScreen", "Barcode data generated: ${rawData.length} chars")
 
-                                // Format barcode to bitmap
-                                android.util.Log.d("MainScreen", "Rendering barcode bitmap...")
-                                val bitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
+                                barcodeBitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
                                     data = rawData,
                                     width = 800,
                                     height = 250,
                                     errorCorrectionLevel = 5
                                 )
 
-                                if (bitmap != null) {
-                                    barcodeBitmap = bitmap
-                                    showBarcode = true
-                                    errorMessage = null
-                                } else {
-                                    errorMessage = "Failed to render barcode image"
-                                }
+                                showBarcode = true
                             } catch (e: AAMVAComplianceException) {
                                 errorMessage = e.errors.joinToString("\n\n") { "• ${it.field}: ${it.message}" }
                             } catch (e: Exception) {
-                                errorMessage = "Generation failed: ${e.javaClass.simpleName}: ${e.message}"
+                                errorMessage = "Generation failed: ${e.message}"
                             } finally {
                                 showProgressDialog = false
                             }
                         }
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.zIndex(10f)
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
