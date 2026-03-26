@@ -204,11 +204,13 @@ fun MainScreen() {
                     },
                     icon = { Icon(Icons.Outlined.QrCode, contentDescription = null) },
                     onClick = {
+                        android.util.Log.d("MainScreen", "Generate Barcode button clicked")
                         showProgressDialog = true
                         errorMessage = null
                         showBarcode = false
                         barcodeBitmap = null
                         scope.launch {
+                            android.util.Log.d("MainScreen", "Coroutine started")
                             try {
                                 // Build the data set
                                 val dataSet = AAMVADataSet(
@@ -235,17 +237,23 @@ fun MainScreen() {
                                 )
 
                                 // Validate the data
+                                android.util.Log.d("MainScreen", "Validating data...")
                                 val validationResult = barcodeGenerator.validateDataSet(dataSet)
                                 if (!validationResult.isValid) {
+                                    android.util.Log.e("MainScreen", "Validation failed: ${validationResult.errors}")
                                     errorMessage = validationResult.errors.joinToString("\n")
                                     showProgressDialog = false
                                     return@launch
                                 }
+                                android.util.Log.d("MainScreen", "Validation passed")
 
                                 // Generate barcode
+                                android.util.Log.d("MainScreen", "Generating barcode data...")
                                 rawData = barcodeGenerator.generateAndValidateBarcode(dataSet)
+                                android.util.Log.d("MainScreen", "Barcode data generated: ${rawData.length} chars")
 
                                 // Format barcode to bitmap
+                                android.util.Log.d("MainScreen", "Rendering barcode bitmap...")
                                 val bitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
                                     data = rawData,
                                     width = 800,
