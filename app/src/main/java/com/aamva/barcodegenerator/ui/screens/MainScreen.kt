@@ -204,6 +204,7 @@ fun MainScreen() {
                     },
                     icon = { Icon(Icons.Outlined.QrCode, contentDescription = null) },
                     onClick = {
+                        Toast.makeText(context, "Button clicked! Generating barcode...", Toast.LENGTH_SHORT).show()
                         android.util.Log.d("MainScreen", "Generate Barcode button clicked")
                         showProgressDialog = true
                         errorMessage = null
