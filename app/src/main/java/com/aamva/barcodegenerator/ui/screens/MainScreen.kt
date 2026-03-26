@@ -116,9 +116,8 @@ fun MainScreen() {
                             painter = painterResource(id = R.drawable.headerlogo),
                             contentDescription = "AAMVA PDF417 Generator Logo",
                             modifier = Modifier
-                                .height(56.dp)
-                                .width(220.dp)
-                                .align(Alignment.CenterStart),
+                                .fillMaxWidth()
+                                .fillMaxHeight(),
                             contentScale = ContentScale.Fit
                         )
                     }
@@ -235,6 +234,7 @@ fun MainScreen() {
                                 val validationResult = barcodeGenerator.validateDataSet(dataSet)
                                 if (!validationResult.isValid) {
                                     errorMessage = validationResult.errors.joinToString("\n")
+                                    showProgressDialog = false
                                     return@launch
                                 }
 
