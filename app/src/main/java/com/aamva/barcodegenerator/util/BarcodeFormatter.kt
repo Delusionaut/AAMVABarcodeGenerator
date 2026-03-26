@@ -66,19 +66,11 @@ object BarcodeFormatter {
         errorCorrectionLevel: Int = 3
     ): Bitmap? {
         return try {
-            if (data.isEmpty()) {
-                android.util.Log.e("BarcodeFormatter", "Cannot encode empty data")
-                return null
-            }
-            
-            android.util.Log.d("BarcodeFormatter", "Encoding PDF417 data: ${data.length} chars")
-            android.util.Log.d("BarcodeFormatter", "First 50 chars: ${data.take(50)}")
-            
             val hints: MutableMap<EncodeHintType, Any> = hashMapOf(
                 EncodeHintType.PDF417_COMPACT to false,
-                EncodeHintType.PDF417_AUTO_ECI to false,
+                EncodeHintType.PDF417_AUTO_ECI to true,
                 EncodeHintType.ERROR_CORRECTION to errorCorrectionLevel,
-                EncodeHintType.CHARACTER_SET to "UTF-8",
+                EncodeHintType.CHARACTER_SET to "ISO-8859-1",
                 EncodeHintType.MARGIN to 2
             )
             
@@ -91,10 +83,8 @@ object BarcodeFormatter {
                 hints
             )
             
-            android.util.Log.d("BarcodeFormatter", "PDF417 encoding successful, creating bitmap")
             createBitmapFromBitMatrix(bitMatrix)
         } catch (e: Exception) {
-            android.util.Log.e("BarcodeFormatter", "PDF417 encoding failed: ${e.javaClass.simpleName}: ${e.message}")
             e.printStackTrace()
             null
         }

@@ -50,9 +50,6 @@ dependencies {
     implementation(group: 'androidx.lifecycle', name: 'lifecycle-runtime-ktx', version: '2.8.7')
     implementation(group: 'androidx.activity', name: 'activity-compose', version: '1.9.3')
     
-    // Kotlin Coroutines
-    implementation(group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-android', version: '1.7.3')
-    
     // Compose
     implementation(platform('androidx.compose:compose-bom:2024.12.01'))
     implementation(group: 'androidx.compose.ui', name: 'ui')
