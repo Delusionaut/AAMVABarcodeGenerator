@@ -206,31 +206,35 @@ fun MainScreen() {
                     onClick = {
                         showProgressDialog = true
                         errorMessage = null
+                        showBarcode = false
+                        barcodeBitmap = null
                         scope.launch {
                             try {
+                                // Build the data set
                                 val dataSet = AAMVADataSet(
-                                    issuerIdentificationNumber = iin,
-                                    customerFamilyName = familyName,
-                                    customerFirstName = firstName,
+                                    issuerIdentificationNumber = iin.ifBlank { "636000" },
+                                    customerFamilyName = familyName.ifBlank { "DOE" },
+                                    customerFirstName = firstName.ifBlank { "JOHN" },
                                     customerMiddleName = middleName,
-                                    dateOfBirth = dateOfBirth,
-                                    dateOfIssue = dateOfIssue.ifEmpty { SimpleDateFormat("MMddyyyy", Locale.US).format(Date()) },
-                                    dateOfExpiry = dateOfExpiry,
-                                    customerIdNumber = customerId,
-                                    documentDiscriminator = documentDiscriminator,
-                                    sex = sex,
-                                    eyeColor = eyeColor,
-                                    height = height,
-                                    addressStreet1 = addressStreet,
-                                    addressCity = addressCity,
-                                    addressJurisdictionCode = addressState,
-                                    addressPostalCode = addressZip,
+                                    dateOfBirth = dateOfBirth.ifBlank { "01011990" },
+                                    dateOfIssue = dateOfIssue.ifBlank { SimpleDateFormat("MMddyyyy", Locale.US).format(Date()) },
+                                    dateOfExpiry = dateOfExpiry.ifBlank { "01012030" },
+                                    customerIdNumber = customerId.ifBlank { "D1234567" },
+                                    documentDiscriminator = documentDiscriminator.ifBlank { "DOC123456" },
+                                    sex = sex.ifBlank { "1" },
+                                    eyeColor = eyeColor.ifBlank { "BRO" },
+                                    height = height.ifBlank { "070 in" },
+                                    addressStreet1 = addressStreet.ifBlank { "123 MAIN ST" },
+                                    addressCity = addressCity.ifBlank { "SPRINGFIELD" },
+                                    addressJurisdictionCode = addressState.ifBlank { "VA" },
+                                    addressPostalCode = addressZip.ifBlank { "12345" },
                                     vehicleClass = vehicleClass,
                                     restrictionCodes = restrictions,
                                     endorsementCodes = endorsements,
                                     countryIdentification = "USA"
                                 )
 
+                                // Validate the data
                                 val validationResult = barcodeGenerator.validateDataSet(dataSet)
                                 if (!validationResult.isValid) {
                                     errorMessage = validationResult.errors.joinToString("\n")
@@ -238,20 +242,28 @@ fun MainScreen() {
                                     return@launch
                                 }
 
+                                // Generate barcode
                                 rawData = barcodeGenerator.generateAndValidateBarcode(dataSet)
 
-                                barcodeBitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
+                                // Format barcode to bitmap
+                                val bitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
                                     data = rawData,
                                     width = 800,
                                     height = 250,
                                     errorCorrectionLevel = 5
                                 )
 
-                                showBarcode = true
+                                if (bitmap != null) {
+                                    barcodeBitmap = bitmap
+                                    showBarcode = true
+                                    errorMessage = null
+                                } else {
+                                    errorMessage = "Failed to render barcode image"
+                                }
                             } catch (e: AAMVAComplianceException) {
                                 errorMessage = e.errors.joinToString("\n\n") { "• ${it.field}: ${it.message}" }
                             } catch (e: Exception) {
-                                errorMessage = "Generation failed: ${e.message}"
+                                errorMessage = "Generation failed: ${e.javaClass.simpleName}: ${e.message}"
                             } finally {
                                 showProgressDialog = false
                             }
