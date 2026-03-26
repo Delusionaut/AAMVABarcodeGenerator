@@ -12,6 +12,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.zIndex
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -190,17 +193,13 @@ fun MainScreen() {
             }
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = currentNavTab == NavTab.Generate,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
+            if (currentNavTab == NavTab.Generate) {
                 ExtendedFloatingActionButton(
-                    text = { 
+                    text = {
                         Text(
                             "Generate Barcode",
                             style = MaterialTheme.typography.labelLarge
-                        ) 
+                        )
                     },
                     icon = { Icon(Icons.Outlined.QrCode, contentDescription = null) },
                     onClick = {
@@ -279,7 +278,8 @@ fun MainScreen() {
                         }
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.zIndex(10f)
                 )
             }
         },
