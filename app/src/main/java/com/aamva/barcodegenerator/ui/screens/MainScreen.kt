@@ -288,6 +288,74 @@ fun MainScreen() {
                         endorsements = endorsements, onEndorsementsChange = { endorsements = it }
                     )
 
+                    // Generate Button
+                    Button(
+                        onClick = {
+                            showProgressDialog = true
+                            errorMessage = null
+                            scope.launch {
+                                try {
+                                    val dataSet = AAMVADataSet(
+                                        issuerIdentificationNumber = iin,
+                                        customerFamilyName = familyName,
+                                        customerFirstName = firstName,
+                                        customerMiddleName = middleName,
+                                        dateOfBirth = dateOfBirth,
+                                        dateOfIssue = dateOfIssue.ifEmpty { SimpleDateFormat("MMddyyyy", Locale.US).format(Date()) },
+                                        dateOfExpiry = dateOfExpiry,
+                                        customerIdNumber = customerId,
+                                        documentDiscriminator = documentDiscriminator,
+                                        sex = sex,
+                                        eyeColor = eyeColor,
+                                        height = height,
+                                        addressStreet1 = addressStreet,
+                                        addressCity = addressCity,
+                                        addressJurisdictionCode = addressState,
+                                        addressPostalCode = addressZip,
+                                        vehicleClass = vehicleClass,
+                                        restrictionCodes = restrictions,
+                                        endorsementCodes = endorsements,
+                                        countryIdentification = "USA"
+                                    )
+
+                                    val validationResult = barcodeGenerator.validateDataSet(dataSet)
+                                    if (!validationResult.isValid) {
+                                        errorMessage = validationResult.errors.joinToString("\n")
+                                        showProgressDialog = false
+                                        return@launch
+                                    }
+
+                                    rawData = barcodeGenerator.generateAndValidateBarcode(dataSet)
+
+                                    barcodeBitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
+                                        data = rawData,
+                                        width = 800,
+                                        height = 250,
+                                        errorCorrectionLevel = 5
+                                    )
+
+                                    showBarcode = true
+                                } catch (e: AAMVAComplianceException) {
+                                    errorMessage = e.errors.joinToString("\n\n") { "• ${it.field}: ${it.message}" }
+                                } catch (e: Exception) {
+                                    errorMessage = "Generation failed: ${e.message}"
+                                } finally {
+                                    showProgressDialog = false
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(Icons.Outlined.QrCode, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Generate Barcode")
+                    }
+
                     // Barcode preview and save
                     if (showBarcode && barcodeBitmap != null) {
                         Card(
