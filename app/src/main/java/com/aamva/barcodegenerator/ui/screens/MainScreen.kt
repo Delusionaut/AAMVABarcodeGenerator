@@ -190,19 +190,8 @@ fun MainScreen() {
             }
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = currentNavTab == NavTab.Generate,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                ExtendedFloatingActionButton(
-                    text = {
-                        Text(
-                            "Generate Barcode",
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    },
-                    icon = { Icon(Icons.Outlined.QrCode, contentDescription = null) },
+            if (currentNavTab == NavTab.Generate) {
+                FloatingActionButton(
                     onClick = {
                         showProgressDialog = true
                         errorMessage = null
@@ -257,9 +246,10 @@ fun MainScreen() {
                             }
                         }
                     },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(Icons.Outlined.QrCode, contentDescription = "Generate Barcode")
+                }
             }
         },
         containerColor = MaterialTheme.colorScheme.background
