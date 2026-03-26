@@ -20,8 +20,15 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
+    - name: Setup Android SDK
+      run: |
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdtools.zip
+        unzip -q /tmp/cmdtools.zip -d /opt/android-sdk/cmdline-tools
+        mv /opt/android-sdk/cmdline-tools/cmdline-tools /opt/android-sdk/cmdline-tools/latest
+        echo "/opt/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        echo "ANDROID_HOME=/opt/android-sdk" >> $GITHUB_ENV
+        yes | sdkmanager --licenses > /dev/null 2>&1 || true
+        sdkmanager "platforms;android-35" "build-tools;35.0.0" > /dev/null
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
