@@ -227,23 +227,20 @@ fun MainScreen() {
         topBar = {
             TopAppBar(
                 title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.headerlogo),
-                            contentDescription = "AAMVA PDF417 Generator Logo",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight(),
-                            contentScale = ContentScale.Fit
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.headerlogo),
+                        contentDescription = "AAMVA PDF417 Generator Logo",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        contentScale = ContentScale.FillBounds
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = GovernmentNavy
-                )
+                ),
+                windowInsets = WindowInsets(0.dp)
             )
         },
         bottomBar = {
@@ -794,14 +791,26 @@ private suspend fun loadBitmap(context: Context, filePath: String): Bitmap? = wi
 }
 
 private fun generateRandomIssueDate(): String {
-    val calendar = Calendar.getInstance()
-    val currentYear = calendar.get(Calendar.YEAR)
-    val startYear = currentYear - 5
-    val year = (startYear until currentYear).random()
-    val month = (1..12).random()
-    val day = (1..28).random()
-    calendar.set(year, month - 1, day)
-    return SimpleDateFormat("MMddyyyy", Locale.US).format(calendar.time)
+    val today = Calendar.getInstance()
+    val todayMillis = today.timeInMillis
+    
+    // Generate a random date in the past, up to 5 years ago, but never after today
+    val fiveYearsAgo = Calendar.getInstance().apply {
+        add(Calendar.YEAR, -5)
+    }.timeInMillis
+    
+    // Get random time between 5 years ago and today
+    val randomMillis = (fiveYearsAgo..todayMillis).random()
+    val randomCalendar = Calendar.getInstance().apply {
+        timeInMillis = randomMillis
+    }
+    
+    // Ensure day is valid for the month
+    val maxDay = randomCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+    val day = minOf((1..28).random(), maxDay)
+    randomCalendar.set(Calendar.DAY_OF_MONTH, day)
+    
+    return SimpleDateFormat("MMddyyyy", Locale.US).format(randomCalendar.time)
 }
 
 private fun calculateExpiryDate(dob: String, issue: String): String {
