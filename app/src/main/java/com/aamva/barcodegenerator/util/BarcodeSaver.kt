@@ -9,7 +9,6 @@ import android.provider.MediaStore
 import com.aamva.barcodegenerator.model.HistoryItem
 import java.io.File
 import java.io.FileOutputStream
-import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,36 +23,62 @@ object BarcodeSaver {
     
     /**
      * Save a bitmap to the device's Pictures directory
-     * @param context Application context
-     * @param bitmap The bitmap to save
-     * @param firstName First name for the filename
-     * @param familyName Family name for the filename
-     * @return The file path if successful, null otherwise
+     * Filename format: Firstname_First3LettersLastname_DOB_State.png
      */
     fun saveBarcodeToStorage(
         context: Context,
         bitmap: Bitmap,
         firstName: String,
-        familyName: String
+        familyName: String,
+        state: String,
+        dateOfBirth: String
     ): String? {
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val fileName = "AAMVA_${familyName}_${firstName}_$timestamp.png"
+        val fileName = generateFileName(firstName, familyName, state, dateOfBirth)
+        val relativePath = getSaveLocation(context)
         
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            saveImageToMediaStore(context, bitmap, fileName)
+            saveImageToMediaStore(context, bitmap, fileName, relativePath)
         } else {
-            saveImageToExternalStorage(context, bitmap, fileName)
+            saveImageToExternalStorage(context, bitmap, fileName, relativePath)
         }
+    }
+    
+    private fun getSaveLocation(context: Context): String {
+        val prefs = context.getSharedPreferences("AAMVA_Settings", Context.MODE_PRIVATE)
+        return prefs.getString("save_location", "Pictures/AAMVA_Barcodes") ?: "Pictures/AAMVA_Barcodes"
+    }
+    
+    /**
+     * Generate filename: Firstname_First3LettersLastname_DOB_State.png
+     * Example: John_Doe_01011990_CA.png
+     */
+    private fun generateFileName(
+        firstName: String,
+        familyName: String,
+        state: String,
+        dateOfBirth: String
+    ): String {
+        val cleanFirstName = firstName.replace(Regex("[^a-zA-Z]"), "").take(20)
+        val cleanLastName = familyName.replace(Regex("[^a-zA-Z]"), "").take(3)
+        val cleanState = state.replace(Regex("[^a-zA-Z]"), "").take(2)
+        val cleanDOB = dateOfBirth.filter { it.isDigit() }.take(8)
+        
+        return "${cleanFirstName}_${cleanLastName}_${cleanDOB}_${cleanState}.png"
     }
     
     /**
      * Save image using MediaStore (Android 10+)
      */
-    private fun saveImageToMediaStore(context: Context, bitmap: Bitmap, fileName: String): String? {
+    private fun saveImageToMediaStore(
+        context: Context, 
+        bitmap: Bitmap, 
+        fileName: String,
+        relativePath: String
+    ): String? {
         val contentValues = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
             put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-            put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/$FOLDER_NAME")
+            put(MediaStore.Images.Media.RELATIVE_PATH, relativePath)
             put(MediaStore.Images.Media.IS_PENDING, 1)
         }
         
@@ -83,9 +108,23 @@ object BarcodeSaver {
      * Save image to external storage (Android 9 and below)
      */
     @Suppress("DEPRECATION")
-    private fun saveImageToExternalStorage(context: Context, bitmap: Bitmap, fileName: String): String? {
-        val picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-        val appDir = File(picturesDir, FOLDER_NAME)
+    private fun saveImageToExternalStorage(
+        context: Context, 
+        bitmap: Bitmap, 
+        fileName: String,
+        relativePath: String
+    ): String? {
+        val parts = relativePath.split("/")
+        var baseDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        
+        if (parts.size >= 2) {
+            when (parts[0]) {
+                "Downloads" -> baseDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                "Documents" -> baseDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+            }
+        }
+        
+        val appDir = File(baseDir, "AAMVA_Barcodes")
         
         if (!appDir.exists()) {
             appDir.mkdirs()
