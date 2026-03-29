@@ -257,6 +257,7 @@ fun MainScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .fillMaxWidth()
                 .padding(paddingValues)
         ) {
             when (currentNavTab) {
