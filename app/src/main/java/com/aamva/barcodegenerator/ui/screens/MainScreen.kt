@@ -6,20 +6,13 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.QrCode
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.QrCodeScanner
@@ -103,6 +96,62 @@ fun MainScreen() {
 
     LaunchedEffect(Unit) {
         historyItems = historyManager.getHistory()
+    }
+
+    // Helper function for barcode generation (DRY principle)
+    val generateBarcode: () -> Unit = {
+        showProgressDialog = true
+        errorMessage = null
+        scope.launch {
+            try {
+                val dataSet = AAMVADataSet(
+                    issuerIdentificationNumber = iin,
+                    customerFamilyName = familyName,
+                    customerFirstName = firstName,
+                    customerMiddleName = middleName,
+                    dateOfBirth = dateOfBirth,
+                    dateOfIssue = dateOfIssue.ifEmpty { SimpleDateFormat("MMddyyyy", Locale.US).format(Date()) },
+                    dateOfExpiry = dateOfExpiry,
+                    customerIdNumber = customerId,
+                    documentDiscriminator = documentDiscriminator,
+                    sex = sex,
+                    eyeColor = eyeColor,
+                    height = height,
+                    addressStreet1 = addressStreet,
+                    addressCity = addressCity,
+                    addressJurisdictionCode = addressState,
+                    addressPostalCode = addressZip,
+                    vehicleClass = vehicleClass,
+                    restrictionCodes = restrictions,
+                    endorsementCodes = endorsements,
+                    countryIdentification = "USA"
+                )
+
+                val validationResult = barcodeGenerator.validateDataSet(dataSet)
+                if (!validationResult.isValid) {
+                    errorMessage = validationResult.errors.joinToString("\n")
+                    showProgressDialog = false
+                    return@launch
+                }
+
+                rawData = barcodeGenerator.generateAndValidateBarcode(dataSet)
+
+                barcodeBitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
+                    data = rawData,
+                    width = 800,
+                    height = 250,
+                    errorCorrectionLevel = 5
+                )
+
+                showBarcode = true
+            } catch (e: AAMVAComplianceException) {
+                errorMessage = e.errors.joinToString("\n\n") { "• ${it.field}: ${it.message}" }
+            } catch (e: Exception) {
+                errorMessage = "Generation failed: ${e.message}"
+            } finally {
+                showProgressDialog = false
+            }
+        }
     }
 
     Scaffold(
@@ -191,64 +240,14 @@ fun MainScreen() {
         },
         floatingActionButton = {
             if (currentNavTab == NavTab.Generate) {
-                FloatingActionButton(
-                    onClick = {
-                        showProgressDialog = true
-                        errorMessage = null
-                        scope.launch {
-                            try {
-                                val dataSet = AAMVADataSet(
-                                    issuerIdentificationNumber = iin,
-                                    customerFamilyName = familyName,
-                                    customerFirstName = firstName,
-                                    customerMiddleName = middleName,
-                                    dateOfBirth = dateOfBirth,
-                                    dateOfIssue = dateOfIssue.ifEmpty { SimpleDateFormat("MMddyyyy", Locale.US).format(Date()) },
-                                    dateOfExpiry = dateOfExpiry,
-                                    customerIdNumber = customerId,
-                                    documentDiscriminator = documentDiscriminator,
-                                    sex = sex,
-                                    eyeColor = eyeColor,
-                                    height = height,
-                                    addressStreet1 = addressStreet,
-                                    addressCity = addressCity,
-                                    addressJurisdictionCode = addressState,
-                                    addressPostalCode = addressZip,
-                                    vehicleClass = vehicleClass,
-                                    restrictionCodes = restrictions,
-                                    endorsementCodes = endorsements,
-                                    countryIdentification = "USA"
-                                )
-
-                                val validationResult = barcodeGenerator.validateDataSet(dataSet)
-                                if (!validationResult.isValid) {
-                                    errorMessage = validationResult.errors.joinToString("\n")
-                                    showProgressDialog = false
-                                    return@launch
-                                }
-
-                                rawData = barcodeGenerator.generateAndValidateBarcode(dataSet)
-
-                                barcodeBitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
-                                    data = rawData,
-                                    width = 800,
-                                    height = 250,
-                                    errorCorrectionLevel = 5
-                                )
-
-                                showBarcode = true
-                            } catch (e: AAMVAComplianceException) {
-                                errorMessage = e.errors.joinToString("\n\n") { "• ${it.field}: ${it.message}" }
-                            } catch (e: Exception) {
-                                errorMessage = "Generation failed: ${e.message}"
-                            } finally {
-                                showProgressDialog = false
-                            }
-                        }
-                    },
-                    containerColor = MaterialTheme.colorScheme.primary
+                ExtendedFloatingActionButton(
+                    onClick = { generateBarcode() },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
-                    Icon(Icons.Outlined.QrCode, contentDescription = "Generate Barcode")
+                    Icon(Icons.Outlined.QrCode, contentDescription = "Generate")
+                    Spacer(Modifier.width(8.dp))
+                    Text("GENERATE BARCODE", fontWeight = FontWeight.Bold)
                 }
             }
         },
@@ -288,74 +287,6 @@ fun MainScreen() {
                         restrictions = restrictions, onRestrictionsChange = { restrictions = it },
                         endorsements = endorsements, onEndorsementsChange = { endorsements = it }
                     )
-
-                    // Generate Button
-                    Button(
-                        onClick = {
-                            showProgressDialog = true
-                            errorMessage = null
-                            scope.launch {
-                                try {
-                                    val dataSet = AAMVADataSet(
-                                        issuerIdentificationNumber = iin,
-                                        customerFamilyName = familyName,
-                                        customerFirstName = firstName,
-                                        customerMiddleName = middleName,
-                                        dateOfBirth = dateOfBirth,
-                                        dateOfIssue = dateOfIssue.ifEmpty { SimpleDateFormat("MMddyyyy", Locale.US).format(Date()) },
-                                        dateOfExpiry = dateOfExpiry,
-                                        customerIdNumber = customerId,
-                                        documentDiscriminator = documentDiscriminator,
-                                        sex = sex,
-                                        eyeColor = eyeColor,
-                                        height = height,
-                                        addressStreet1 = addressStreet,
-                                        addressCity = addressCity,
-                                        addressJurisdictionCode = addressState,
-                                        addressPostalCode = addressZip,
-                                        vehicleClass = vehicleClass,
-                                        restrictionCodes = restrictions,
-                                        endorsementCodes = endorsements,
-                                        countryIdentification = "USA"
-                                    )
-
-                                    val validationResult = barcodeGenerator.validateDataSet(dataSet)
-                                    if (!validationResult.isValid) {
-                                        errorMessage = validationResult.errors.joinToString("\n")
-                                        showProgressDialog = false
-                                        return@launch
-                                    }
-
-                                    rawData = barcodeGenerator.generateAndValidateBarcode(dataSet)
-
-                                    barcodeBitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
-                                        data = rawData,
-                                        width = 800,
-                                        height = 250,
-                                        errorCorrectionLevel = 5
-                                    )
-
-                                    showBarcode = true
-                                } catch (e: AAMVAComplianceException) {
-                                    errorMessage = e.errors.joinToString("\n\n") { "• ${it.field}: ${it.message}" }
-                                } catch (e: Exception) {
-                                    errorMessage = "Generation failed: ${e.message}"
-                                } finally {
-                                    showProgressDialog = false
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(Icons.Outlined.QrCode, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Generate Barcode")
-                    }
 
                     // Barcode preview and save
                     if (showBarcode && barcodeBitmap != null) {
