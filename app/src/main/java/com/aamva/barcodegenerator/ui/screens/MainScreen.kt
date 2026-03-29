@@ -98,10 +98,13 @@ fun MainScreen() {
         historyItems = historyManager.getHistory()
     }
 
-    // Helper function for barcode generation (DRY principle)
-    val generateBarcode: () -> Unit = {
+    // Barcode generation function
+    fun generateBarcodeNow() {
+        Toast.makeText(context, "Generating barcode...", Toast.LENGTH_SHORT).show()
         showProgressDialog = true
         errorMessage = null
+        showBarcode = false
+        
         scope.launch {
             try {
                 val dataSet = AAMVADataSet(
@@ -131,23 +134,33 @@ fun MainScreen() {
                 if (!validationResult.isValid) {
                     errorMessage = validationResult.errors.joinToString("\n")
                     showProgressDialog = false
+                    Toast.makeText(context, "Validation failed", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
                 rawData = barcodeGenerator.generateAndValidateBarcode(dataSet)
 
-                barcodeBitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
+                val bitmap = BarcodeFormatter.generatePDF417BitmapWithECL(
                     data = rawData,
                     width = 800,
                     height = 250,
                     errorCorrectionLevel = 5
                 )
-
-                showBarcode = true
+                
+                if (bitmap != null) {
+                    barcodeBitmap = bitmap
+                    showBarcode = true
+                    Toast.makeText(context, "Barcode generated!", Toast.LENGTH_SHORT).show()
+                } else {
+                    errorMessage = "Failed to render barcode image"
+                    Toast.makeText(context, "Render failed", Toast.LENGTH_SHORT).show()
+                }
             } catch (e: AAMVAComplianceException) {
                 errorMessage = e.errors.joinToString("\n\n") { "• ${it.field}: ${it.message}" }
+                Toast.makeText(context, "Compliance error", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 errorMessage = "Generation failed: ${e.message}"
+                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
                 showProgressDialog = false
             }
@@ -241,7 +254,7 @@ fun MainScreen() {
         floatingActionButton = {
             if (currentNavTab == NavTab.Generate) {
                 ExtendedFloatingActionButton(
-                    onClick = { generateBarcode() },
+                    onClick = { generateBarcodeNow() },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
