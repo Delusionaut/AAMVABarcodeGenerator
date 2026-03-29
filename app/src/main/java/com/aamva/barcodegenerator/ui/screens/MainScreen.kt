@@ -3,25 +3,24 @@ package com.aamva.barcodegenerator.ui.screens
 import com.aamva.barcodegenerator.ui.theme.GovernmentNavy
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.outlined.QrCode
-import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.QrCodeScanner
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -44,7 +43,41 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 enum class NavTab {
-    Generate, History, Validate
+    Generate, History, Validate, Settings
+}
+
+object SettingsManager {
+    private const val PREFS_NAME = "AAMVA_Settings"
+    private const val KEY_SAVE_LOCATION = "save_location"
+    private const val KEY_AUTO_SAVE = "auto_save"
+    
+    const val LOCATION_PICTURES = "Pictures/AAMVA_Barcodes"
+    const val LOCATION_DOWNLOADS = "Downloads/AAMVA_Barcodes"
+    const val LOCATION_DOCUMENTS = "Documents/AAMVA_Barcodes"
+    
+    fun getSaveLocation(context: Context): String {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(KEY_SAVE_LOCATION, LOCATION_PICTURES) ?: LOCATION_PICTURES
+    }
+    
+    fun setSaveLocation(context: Context, location: String) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_SAVE_LOCATION, location)
+            .apply()
+    }
+    
+    fun getAutoSave(context: Context): Boolean {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getBoolean(KEY_AUTO_SAVE, true)
+    }
+    
+    fun setAutoSave(context: Context, autoSave: Boolean) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_AUTO_SAVE, autoSave)
+            .apply()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,6 +85,7 @@ enum class NavTab {
 fun MainScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val prefs = remember { context.getSharedPreferences("AAMVA_Settings", Context.MODE_PRIVATE) }
 
     var currentNavTab by remember { mutableStateOf(NavTab.Generate) }
     var currentFormTab by remember { mutableStateOf(FormTab.Personal) }
@@ -83,6 +117,7 @@ fun MainScreen() {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var rawData by remember { mutableStateOf("") }
     var showProgressDialog by remember { mutableStateOf(false) }
+    var currentFilePath by remember { mutableStateOf<String?>(null) }
 
     // History state
     var historyItems by remember { mutableStateOf<List<HistoryItem>>(emptyList()) }
@@ -99,11 +134,12 @@ fun MainScreen() {
     }
 
     // Barcode generation function
-    fun generateBarcodeNow() {
+    fun generateAndSaveBarcode() {
         Toast.makeText(context, "Generating barcode...", Toast.LENGTH_SHORT).show()
         showProgressDialog = true
         errorMessage = null
         showBarcode = false
+        currentFilePath = null
         
         scope.launch {
             try {
@@ -150,7 +186,27 @@ fun MainScreen() {
                 if (bitmap != null) {
                     barcodeBitmap = bitmap
                     showBarcode = true
-                    Toast.makeText(context, "Barcode generated!", Toast.LENGTH_SHORT).show()
+                    
+                    // Auto-save if enabled
+                    if (SettingsManager.getAutoSave(context)) {
+                        val filePath = BarcodeSaver.saveBarcodeToStorage(
+                            context, bitmap, firstName, familyName, addressState, dateOfBirth
+                        )
+                        if (filePath != null) {
+                            currentFilePath = filePath
+                            val historyItem = BarcodeSaver.createHistoryItem(
+                                firstName, familyName, dateOfBirth, customerId, filePath
+                            )
+                            historyManager.addHistoryItem(historyItem)
+                            historyItems = historyManager.getHistory()
+                            showSaveSuccessDialog = true
+                            Toast.makeText(context, "Saved to $filePath", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(context, "Barcode generated but save failed", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(context, "Barcode generated! (Auto-save disabled)", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
                     errorMessage = "Failed to render barcode image"
                     Toast.makeText(context, "Render failed", Toast.LENGTH_SHORT).show()
@@ -249,18 +305,36 @@ fun MainScreen() {
                         indicatorColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 )
+                NavigationBarItem(
+                    selected = currentNavTab == NavTab.Settings,
+                    onClick = { currentNavTab = NavTab.Settings },
+                    icon = {
+                        Icon(
+                            imageVector = if (currentNavTab == NavTab.Settings) Icons.Filled.Settings else Icons.Outlined.Settings,
+                            contentDescription = null
+                        )
+                    },
+                    label = { Text("Settings") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                )
             }
         },
         floatingActionButton = {
             if (currentNavTab == NavTab.Generate) {
                 ExtendedFloatingActionButton(
-                    onClick = { generateBarcodeNow() },
+                    onClick = { generateAndSaveBarcode() },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(Icons.Outlined.QrCode, contentDescription = "Generate")
                     Spacer(Modifier.width(8.dp))
-                    Text("GENERATE BARCODE", fontWeight = FontWeight.Bold)
+                    Text("GENERATE & SAVE", fontWeight = FontWeight.Bold)
                 }
             }
         },
@@ -301,7 +375,7 @@ fun MainScreen() {
                         endorsements = endorsements, onEndorsementsChange = { endorsements = it }
                     )
 
-                    // Barcode preview and save
+                    // Barcode preview
                     if (showBarcode && barcodeBitmap != null) {
                         Card(
                             modifier = Modifier
@@ -337,34 +411,13 @@ fun MainScreen() {
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                Spacer(Modifier.height(16.dp))
-                                Button(
-                                    onClick = {
-                                        scope.launch {
-                                            val filePath = BarcodeSaver.saveBarcodeToStorage(
-                                                context, barcodeBitmap!!, firstName, familyName
-                                            )
-                                            if (filePath != null) {
-                                                val historyItem = BarcodeSaver.createHistoryItem(
-                                                    firstName, familyName, dateOfBirth, customerId, filePath
-                                                )
-                                                historyManager.addHistoryItem(historyItem)
-                                                historyItems = historyManager.getHistory()
-                                                showSaveSuccessDialog = true
-                                            } else {
-                                                Toast.makeText(context, "Save failed", Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    ),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(Modifier.width(8.dp))
-                                    Text("Save PNG")
+                                currentFilePath?.let { path ->
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        "Saved: $path",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
                                 }
                             }
                         }
@@ -421,6 +474,9 @@ fun MainScreen() {
                 NavTab.Validate -> {
                     ValidateScreen()
                 }
+                NavTab.Settings -> {
+                    SettingsScreen()
+                }
             }
         }
     }
@@ -441,7 +497,7 @@ fun MainScreen() {
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        "Validating data, generating barcode, rendering image...",
+                        "Validating data, generating barcode, saving...",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -457,7 +513,7 @@ fun MainScreen() {
         AlertDialog(
             onDismissRequest = { showSaveSuccessDialog = false },
             title = { Text("Saved!") },
-            text = { Text("Saved to Pictures/AAMVA_Barcodes/") },
+            text = { Text("Saved to ${SettingsManager.getSaveLocation(context)}") },
             confirmButton = {
                 TextButton(onClick = { showSaveSuccessDialog = false }) { 
                     Text("OK", color = MaterialTheme.colorScheme.primary) 
@@ -518,6 +574,206 @@ fun MainScreen() {
                 },
                 containerColor = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingsScreen() {
+    val context = LocalContext.current
+    var saveLocation by remember { mutableStateOf(SettingsManager.getSaveLocation(context)) }
+    var autoSave by remember { mutableStateOf(SettingsManager.getAutoSave(context)) }
+    var showLocationDialog by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            "Settings",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = GovernmentNavy
+        )
+        
+        Spacer(Modifier.height(24.dp))
+        
+        // Auto-save toggle
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Auto-save Barcodes",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        "Automatically save to storage after generation",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = autoSave,
+                    onCheckedChange = { 
+                        autoSave = it
+                        SettingsManager.setAutoSave(context, it)
+                    }
+                )
+            }
+        }
+        
+        Spacer(Modifier.height(12.dp))
+        
+        // Save location
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showLocationDialog = true },
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Save Location",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        saveLocation,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        
+        Spacer(Modifier.height(24.dp))
+        
+        // Info section
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    "Filename Format",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Firstname_First3LettersLastname_DOB_State.png",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Example: John_Doe_01011990_CA.png",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+    }
+    
+    // Location selection dialog
+    if (showLocationDialog) {
+        AlertDialog(
+            onDismissRequest = { showLocationDialog = false },
+            title = { Text("Save Location") },
+            text = {
+                Column {
+                    LocationOption(
+                        title = "Pictures",
+                        path = SettingsManager.LOCATION_PICTURES,
+                        selected = saveLocation == SettingsManager.LOCATION_PICTURES,
+                        onClick = {
+                            saveLocation = SettingsManager.LOCATION_PICTURES
+                            SettingsManager.setSaveLocation(context, SettingsManager.LOCATION_PICTURES)
+                            showLocationDialog = false
+                        }
+                    )
+                    LocationOption(
+                        title = "Downloads",
+                        path = SettingsManager.LOCATION_DOWNLOADS,
+                        selected = saveLocation == SettingsManager.LOCATION_DOWNLOADS,
+                        onClick = {
+                            saveLocation = SettingsManager.LOCATION_DOWNLOADS
+                            SettingsManager.setSaveLocation(context, SettingsManager.LOCATION_DOWNLOADS)
+                            showLocationDialog = false
+                        }
+                    )
+                    LocationOption(
+                        title = "Documents",
+                        path = SettingsManager.LOCATION_DOCUMENTS,
+                        selected = saveLocation == SettingsManager.LOCATION_DOCUMENTS,
+                        onClick = {
+                            saveLocation = SettingsManager.LOCATION_DOCUMENTS
+                            SettingsManager.setSaveLocation(context, SettingsManager.LOCATION_DOCUMENTS)
+                            showLocationDialog = false
+                        }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLocationDialog = false }) {
+                    Text("Cancel")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    }
+}
+
+@Composable
+private fun LocationOption(
+    title: String,
+    path: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                path,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (selected) {
+            Icon(
+                Icons.Default.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
