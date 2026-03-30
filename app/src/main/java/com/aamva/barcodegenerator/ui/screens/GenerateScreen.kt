@@ -99,6 +99,33 @@ enum class FormSection(val title: String) {
     VEHICLE("Vehicle Information")
 }
 
+// Eye Color Options (AAMVA D20)
+val EYE_COLOR_OPTIONS = listOf(
+    "BLK" to "Black",
+    "BLU" to "Blue",
+    "BRO" to "Brown",
+    "GRY" to "Gray",
+    "GRN" to "Green",
+    "HAZ" to "Hazel",
+    "MAR" to "Maroon",
+    "PNK" to "Pink",
+    "DIC" to "Dichromatic",
+    "UNK" to "Unknown"
+)
+
+// Hair Color Options (AAMVA D20)
+val HAIR_COLOR_OPTIONS = listOf(
+    "BAL" to "Bald",
+    "BLK" to "Black",
+    "BLN" to "Blond",
+    "BRO" to "Brown",
+    "GRY" to "Gray",
+    "RED" to "Red",
+    "SND" to "Sandy",
+    "WHI" to "White",
+    "UNK" to "Unknown"
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenerateScreen(
@@ -308,19 +335,19 @@ fun GenerateScreen(
                         modifier = Modifier.weight(0.2f),
                         maxChars = 1
                     )
-                    CompactTextField(
+                    CompactDropdownField(
                         value = eyeColor,
-                        onValueChange = { onEyeColorChange(it.take(3).uppercase()) },
+                        onValueChange = onEyeColorChange,
                         label = "EYE COLOR *",
-                        modifier = Modifier.weight(0.35f),
-                        maxChars = 3
+                        modifier = Modifier.weight(0.4f),
+                        options = EYE_COLOR_OPTIONS
                     )
-                    CompactTextField(
+                    CompactDropdownField(
                         value = hairColor,
-                        onValueChange = { onHairColorChange(it.take(3).uppercase()) },
+                        onValueChange = onHairColorChange,
                         label = "HAIR COLOR",
-                        modifier = Modifier.weight(0.25f),
-                        maxChars = 3
+                        modifier = Modifier.weight(0.4f),
+                        options = HAIR_COLOR_OPTIONS
                     )
                     CompactTextField(
                         value = height,
