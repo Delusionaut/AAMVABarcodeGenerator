@@ -649,12 +649,24 @@ private fun calculateExpiryDate(dob: String, issue: String): String {
 }
 
 private fun generateRandomIssueDate(): String {
-    val calendar = Calendar.getInstance()
-    val currentYear = calendar.get(Calendar.YEAR)
-    val startYear = currentYear - 5
-    val year = (startYear until currentYear).random()
-    val month = (1..12).random()
-    val day = (1..28).random()
-    calendar.set(year, month - 1, day)
-    return SimpleDateFormat("MMddyyyy", Locale.US).format(calendar.time)
+    val today = Calendar.getInstance()
+    val todayYear = today.get(Calendar.YEAR)
+    val todayMonth = today.get(Calendar.MONTH) + 1
+    val todayDay = today.get(Calendar.DAY_OF_MONTH)
+    val todayDateValue = todayYear * 10000 + todayMonth * 100 + todayDay
+
+    while (true) {
+        val calendar = Calendar.getInstance()
+        val startYear = todayYear - 5
+        val year = (startYear until todayYear).random()
+        val month = (1..12).random()
+        val day = (1..28).random()
+        calendar.set(year, month - 1, day)
+        
+        val dateValue = year * 10000 + month * 100 + day
+        
+        if (dateValue <= todayDateValue) {
+            return SimpleDateFormat("MMddyyyy", Locale.US).format(calendar.time)
+        }
+    }
 }
