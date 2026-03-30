@@ -117,6 +117,20 @@ object AAMVAConstants {
         const val HAZEL = "HAZ"
         const val MAROON = "MAR"
         const val PINK = "PNK"
+        const val DICHROMATIC = "DIC"
+        const val UNKNOWN = "UNK"
+    }
+    
+    // Hair Color Codes (ANSI D-20 / AAMVA D20)
+    object HairColorCodes {
+        const val BALD = "BAL"
+        const val BLACK = "BLK"
+        const val BLOND = "BLN"
+        const val BROWN = "BRO"
+        const val GRAY = "GRY"
+        const val RED = "RED"
+        const val SANDY = "SND"
+        const val WHITE = "WHI"
         const val UNKNOWN = "UNK"
     }
 }

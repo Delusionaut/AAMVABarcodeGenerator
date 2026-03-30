@@ -102,6 +102,7 @@ fun MainScreen() {
     var documentDiscriminator by remember { mutableStateOf("") }
     var sex by remember { mutableStateOf("1") }
     var eyeColor by remember { mutableStateOf("BRO") }
+    var hairColor by remember { mutableStateOf("BRO") }
     var height by remember { mutableStateOf("070 in") }
     var addressStreet by remember { mutableStateOf("") }
     var addressCity by remember { mutableStateOf("") }
@@ -155,6 +156,7 @@ fun MainScreen() {
                     documentDiscriminator = documentDiscriminator,
                     sex = sex,
                     eyeColor = eyeColor,
+                    hairColor = hairColor,
                     height = height,
                     addressStreet1 = addressStreet,
                     addressCity = addressCity,
@@ -362,6 +364,7 @@ fun MainScreen() {
                         onCalculateDocDisc = { documentDiscriminator = calculateDocumentDiscriminator(dateOfIssue, dateOfExpiry) },
                         sex = sex, onSexChange = { sex = it },
                         eyeColor = eyeColor, onEyeColorChange = { eyeColor = it },
+                        hairColor = hairColor, onHairColorChange = { hairColor = it },
                         height = height, onHeightChange = { height = it },
                         addressStreet = addressStreet, onAddressStreetChange = { addressStreet = it },
                         addressCity = addressCity, onAddressCityChange = { addressCity = it },

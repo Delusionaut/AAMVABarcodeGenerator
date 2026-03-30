@@ -78,6 +78,11 @@ class SubfileEncoder {
         sb.append(encodeDataElement(AAMVAConstants.MandatoryElements.DDF, dataSet.firstNameTruncation, true))
         sb.append(encodeDataElement(AAMVAConstants.MandatoryElements.DDG, dataSet.middleNameTruncation, true))
         
+        // Optional elements
+        addOptionalElement(sb, AAMVAConstants.OptionalElements.DAH, dataSet.addressStreet2)
+        addOptionalElement(sb, AAMVAConstants.OptionalElements.DAZ, dataSet.hairColor)
+        addOptionalElement(sb, AAMVAConstants.OptionalElements.DAW, dataSet.weightRange)
+        
         // Segment terminator
         sb.append(AAMVAConstants.SEGMENT_TERMINATOR)
         
@@ -86,7 +91,7 @@ class SubfileEncoder {
     
     
     private fun encodeDataElement(elementId: String, value: String, isMandatory: Boolean = false): String {
-        val effectiveValue = value
+        val effectiveValue = if (isMandatory && value.isEmpty()) "NONE" else value
         return "$elementId$effectiveValue${AAMVAConstants.DATA_ELEMENT_SEPARATOR}"
     }
     

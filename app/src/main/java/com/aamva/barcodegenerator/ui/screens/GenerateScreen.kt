@@ -129,6 +129,8 @@ fun GenerateScreen(
     onSexChange: (String) -> Unit,
     eyeColor: String,
     onEyeColorChange: (String) -> Unit,
+    hairColor: String,
+    onHairColorChange: (String) -> Unit,
     height: String,
     onHeightChange: (String) -> Unit,
     addressStreet: String,
@@ -303,7 +305,7 @@ fun GenerateScreen(
                         value = sex,
                         onValueChange = { onSexChange(it.take(1)) },
                         label = "SEX *",
-                        modifier = Modifier.weight(0.25f),
+                        modifier = Modifier.weight(0.2f),
                         maxChars = 1
                     )
                     CompactTextField(
@@ -314,10 +316,17 @@ fun GenerateScreen(
                         maxChars = 3
                     )
                     CompactTextField(
+                        value = hairColor,
+                        onValueChange = { onHairColorChange(it.take(3).uppercase()) },
+                        label = "HAIR COLOR",
+                        modifier = Modifier.weight(0.25f),
+                        maxChars = 3
+                    )
+                    CompactTextField(
                         value = height,
                         onValueChange = onHeightChange,
                         label = "HEIGHT *",
-                        modifier = Modifier.weight(0.4f)
+                        modifier = Modifier.weight(0.2f)
                     )
                 }
             }
