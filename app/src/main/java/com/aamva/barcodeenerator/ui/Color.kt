@@ -1,4 +1,3 @@
-import com.aamva.barcodegenerator.ui.theme.AdvancedGlassEffects
 package com.aamva.barcodegenerator.ui.theme
 
 import androidx.compose.ui.graphics.Color
