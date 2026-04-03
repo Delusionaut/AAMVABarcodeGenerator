@@ -1,0 +1,66 @@
+name: Android CI - Multi-Branch
+
+on:
+  push:
+    branches: [ main, modern-ui-redesign, develop, feature/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Setup Android SDK
+      run: |
+        yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+        /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0" > /dev/null 2>&1 || true
+        
+    - name: Setup Android environment
+      run: |
+        echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+        echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+        
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Clean build
+      run: ./gradlew clean
+      
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+      
+    - name: Build Release APK (if tags)
+      if: startsWith(github.ref, 'refs/tags/')
+      run: ./gradlew assembleRelease
+      
+    - name: Upload Debug APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-apk-${{ github.ref_name }}
+        path: app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 7
+        
+    - name: Upload Release APK (if tag)
+      uses: actions/upload-artifact@v4
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        name: release-apk-${{ github.ref_name }}
+        path: app/build/outputs/apk/release/app-release.apk
+        retention-days: 30
+        
+    - name: Print Build Info
+      run: |
+        echo "🔨 Build completed on branch: ${{ github.ref_name }}"
+        echo "📱 App version from gradle:"
+        grep "versionName" app/build.gradle || echo "No versionName found"
+        
