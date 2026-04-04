@@ -10,115 +10,82 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// DMV Light Theme - Compact government form aesthetic
-private val GovernmentLightColorScheme = lightColorScheme(
-    primary = GovernmentNavy,
-    onPrimary = OfficialWhite,
-    primaryContainer = GovernmentNavyPale,
-    onPrimaryContainer = GovernmentNavyDark,
-    
-    secondary = GovernmentGray,
-    onSecondary = OfficialWhite,
-    secondaryContainer = GovernmentGrayPale,
-    onSecondaryContainer = GovernmentGrayDark,
-    
-    tertiary = GovernmentNavyLight,
-    onTertiary = OfficialWhite,
-    tertiaryContainer = GovernmentGrayPale,
-    onTertiaryContainer = GovernmentNavy,
-    
-    error = GovernmentRed,
-    onError = OfficialWhite,
-    errorContainer = GovernmentRedLight,
-    onErrorContainer = GovernmentRed,
-    
-    background = OfficialLight,
-    onBackground = GovernmentGrayDark,
-    
-    surface = OfficialWhite,
-    onSurface = GovernmentGrayDark,
-    surfaceVariant = GovernmentGrayPale,
+// Modern light color scheme
+private val ModernLightColorScheme = lightColorScheme(
+    primary = ModernPrimary,
+    onPrimary = ModernOnPrimary,
+    primaryContainer = ModernPrimaryLight,
+    onPrimaryContainer = ModernPrimaryDark,
+    secondary = ModernSecondary,
+    onSecondary = ModernOnPrimary,
+    tertiary = ModernAccent,
+    onTertiary = ModernOnPrimary,
+    background = ModernBackground,
+    onBackground = ModernTextPrimary,
+    surface = ModernSurface,
+    onSurface = ModernOnSurface,
+    surfaceVariant = GovernmentNavyPale,
     onSurfaceVariant = GovernmentGray,
-    
-    outline = OfficialBorder,
-    outlineVariant = OfficialDivider,
-    
-    inverseSurface = GovernmentGrayDark,
-    inverseOnSurface = GovernmentGrayPale,
-    inversePrimary = GovernmentNavyLight,
-    
-    scrim = Color.Black.copy(alpha = 0.32f)
+    error = ModernError,
+    onError = ModernOnPrimary,
+    outline = ModernBorderMedium,
+    outlineVariant = ModernBorderLight
 )
 
-// Government Dark Theme
-private val GovernmentDarkColorScheme = darkColorScheme(
-    primary = GovernmentNavyLight,
-    onPrimary = GovernmentNavyDark,
-    primaryContainer = GovernmentNavy,
-    onPrimaryContainer = GovernmentNavyPale,
-    
-    secondary = GovernmentGrayLight,
-    onSecondary = GovernmentGrayDark,
-    secondaryContainer = GovernmentGray,
-    onSecondaryContainer = GovernmentGrayPale,
-    
-    tertiary = GovernmentNavyPale,
-    onTertiary = GovernmentNavyDark,
-    tertiaryContainer = GovernmentNavyDark,
-    onTertiaryContainer = GovernmentNavyPale,
-    
-    error = Color(0xFFFF8A80),
-    onError = Color(0xFF690005),
-    errorContainer = Color(0xFF93000A),
-    onErrorContainer = Color(0xFFFFDAD6),
-    
-    background = GovernmentGrayDark,
-    onBackground = GovernmentGrayPale,
-    
-    surface = GovernmentGrayDark,
-    onSurface = GovernmentGrayPale,
-    surfaceVariant = GovernmentGray,
+// Modern dark color scheme
+private val ModernDarkColorScheme = darkColorScheme(
+    primary = ModernPrimaryLight,
+    onPrimary = ModernPrimaryDark,
+    primaryContainer = ModernPrimaryDark,
+    onPrimaryContainer = ModernPrimaryLight,
+    secondary = ModernSecondary,
+    onSecondary = ModernOnPrimary,
+    tertiary = ModernAccentLight,
+    onTertiary = ModernPrimaryDark,
+    background = ModernBackgroundDark,
+    onBackground = ModernOnPrimary,
+    surface = ModernSurfaceDark,
+    onSurface = ModernOnPrimary,
+    surfaceVariant = GovernmentNavyDark,
     onSurfaceVariant = GovernmentGrayLight,
-    
-    outline = GovernmentGray,
-    outlineVariant = GovernmentGrayDark,
-    
-    inverseSurface = GovernmentGrayPale,
-    inverseOnSurface = GovernmentGrayDark,
-    inversePrimary = GovernmentNavy,
-    
-    scrim = Color.Black.copy(alpha = 0.32f)
+    error = ModernError,
+    onError = ModernOnPrimary,
+    outline = ModernBorderDark,
+    outlineVariant = ModernBorderMedium
 )
 
 @Composable
 fun AAMVABarcodeGeneratorTheme(
-    darkTheme: Boolean = false,
+    darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+    val view = LocalView.current
+    
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            dynamicLightColorScheme(context)
+            if (darkTheme) dynamicDarkColorScheme(context)
+            else dynamicLightColorScheme(context)
         }
-        else -> GovernmentLightColorScheme
+        darkTheme -> ModernDarkColorScheme
+        else -> ModernLightColorScheme
     }
     
-    val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = GovernmentNavy.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+            val window = (context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat.setDecorFitsSystemWindows(window, false)
         }
     }
-
+    
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
